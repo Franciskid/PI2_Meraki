@@ -16,7 +16,7 @@ import requests
 from influxdb_client import Point, InfluxDBClient
 from urllib3 import Retry
 
-from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors
+from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, sensor_mapping
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 import pandas as pd
@@ -94,7 +94,7 @@ def get_sensor_name_mapping():
 
     try:
         msg = requests.request('GET', f"{base_url}/networks/{network_id}/sensors",
-                               headers=headers)
+                                headers=headers)
         data = msg.json()
         sensor_name_mapping = {}
         for s in data["sensors"]:
@@ -103,6 +103,11 @@ def get_sensor_name_mapping():
     except Exception as e:
         print("API Connection error: {}".format(e))
 
+def get_name(serial):
+    for x in sensor_mapping:
+        if (x["serial"] == serial):
+            return x["name"]
+    return serial
 
 def get_shortened_sensor_name(sensor):
     return sensor[13:]
@@ -138,7 +143,7 @@ def put_historical_data_into_influx_temp_hum(sensor_serial, timespan, resolution
         print(f"{sensor_serial} - can't insert into dataframe: {e}")
     
     global points
-    points = [Point(sensor_serial).tag("location", "L404").field("temperature", x.temperature).field("humidity", x.humidity).time(x.Index) for x in df.itertuples(index=True)]
+    points = [Point(get_name(sensor_serial)).tag("location", "L404").field("temperature", x.temperature).field("humidity", x.humidity).time(x.Index) for x in df.itertuples(index=True)]
     #points = [print(x) for x in df.itertuples()]
     
     try:
@@ -175,10 +180,10 @@ def main():
                 influx_db.write(
                     bucket=bucket,
                     org=org,
-                    record=Point(sensor_name_mapping[r["serial"]][13:])
+                    record=Point(get_name(r["serial"]))
                         .field("temperature", r["value"])
                         .field("humidity", r_hum["value"])
-                        .time(r["ts"]).tag('Location', locationTag))
+                        .time(r["ts"]).tag('location', locationTag))
                 print("**added to db**")
             except Exception as e:
                 print("Can't write to database: {}".format(e))
