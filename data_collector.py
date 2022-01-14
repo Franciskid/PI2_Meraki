@@ -16,14 +16,14 @@ import requests
 from influxdb_client import Point, InfluxDBClient
 from urllib3 import Retry
 
-from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, sensor_mapping
+from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, door_sensors, sensor_mapping
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 import pandas as pd
 import time
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from meteostat import Point as meteoPoint, Hourly
 
 # Influx DB Connector
@@ -126,30 +126,59 @@ def get_weather_stats():
     # Create Point for Courbevoie
     location = meteoPoint(48.896640253127785, 2.23684585029297, 53)
 
-    # Get daily data for 2018
+    # Get daily data for december till now
     data = Hourly(location, start, end)
     data = data.fetch()
     
     return data
 
 
-def put_historical_weather_data_into_influx_temp_hum():
+def put_historical_data_into_influx_weather_temp_hum():
     data = get_weather_stats()
     
     
     points = [Point("Weather").tag("location", "Pôle LdV").field("temperature", x.temp).field("humidity", x.rhum).time(x.Index) for x in data.itertuples(index=True)]
-    #points = [print(x) for x in df.itertuples()]
     
     try:
         influx_db.write(
             bucket=bucket,
             org=org,
             record=points)
-            #data_frame_measurement_name=sensor_name_mapping[sensor_serial][13:], data_frame_tag_columns=['Location'])
         print("Weather data - Historical Temperatures/Humidity data successfully inserted.")
     except Exception as e:
         print(f"Weather data - can't write to database: {e}")
+
+
+def put_historical_data_into_influx_door(sensor_serial, timespan, resolution):
+    """
+    Insert historical data into InfluxDB - doors status
+    """
+    print(f"Saving {get_name(sensor_serial)} data into databse")
+    try:
+        doors_readings = get_historical_sensor_reading(sensor_serial, "door", timespan, resolution)
+        df = pd.DataFrame(doors_readings[0]["data"])
+
+        df = df.rename(columns={"ts": "ts", "value": "door"})
+        df = df.set_index("ts")
+        
+        print (df)
+        
+        points = [Point(get_name(sensor_serial)).tag("location", "L404").field("door status", x.door).time(x.Index) for x in df.itertuples(index=True)]
+        
+        try:
+            influx_db.write(
+                bucket=bucket,
+                org=org,
+                record=points)
+            print(f"{get_name(sensor_serial)} - Historical Temperature data successfully inserted.")
+            
+        except Exception as e:
+                print(f"{get_name(sensor_serial)} - can't write to database: {e}")
+        
+    except Exception as e:
+        print(f"{get_name(sensor_serial)} - can't insert into dataframe: {e}")
     
+
 
 def checkLocation(sensor):
     if 'COLD' in sensor:
@@ -162,7 +191,7 @@ def put_historical_data_into_influx_temp_hum(sensor_serial, timespan, resolution
     """
     Insert historical data into InfluxDB - temperature + humidity only
     """
-    print(f"Saving {sensor_serial} data into databse")
+    print(f"Saving {get_name(sensor_serial)} data into databse")
     try:
         temperature_readings = get_historical_sensor_reading(sensor_serial, "temperature", timespan, resolution)
         df = pd.DataFrame(temperature_readings[0]["data"])
@@ -178,44 +207,70 @@ def put_historical_data_into_influx_temp_hum(sensor_serial, timespan, resolution
         df = pd.concat([df, df_hum], axis=1, join="inner")
         
     except Exception as e:
-        print(f"{sensor_serial} - can't insert into dataframe: {e}")
+        print(f"{get_name(sensor_serial)} - can't insert into dataframe: {e}")
     
     points = [Point(get_name(sensor_serial)).tag("location", "L404").field("temperature", x.temperature).field("humidity", x.humidity).time(x.Index) for x in df.itertuples(index=True)]
-    #points = [print(x) for x in df.itertuples()]
     
     try:
         influx_db.write(
             bucket=bucket,
             org=org,
             record=points)
-            #data_frame_measurement_name=sensor_name_mapping[sensor_serial][13:], data_frame_tag_columns=['Location'])
-        print(f"{sensor_serial} - Historical Temperature data successfully inserted.")
+        print(f"{get_name(sensor_serial)} - Historical Temperature data successfully inserted.")
     except Exception as e:
-        print(f"{sensor_serial} - can't write to database: {e}")
+        print(f"{get_name(sensor_serial)} - can't write to database: {e}")
 
 
 def main():
-    print("** starting data collection *** ")
+    print("\n***** HISTORICAL DATA COLLECTION ****** \n\n")
 
     global sensor_name_mapping
     sensor_name_mapping = get_sensor_name_mapping()
 
-    put_historical_weather_data_into_influx_temp_hum() # from dec to now, weather data every hour
-    
-    for s in temperature_sensors:
-        put_historical_data_into_influx_temp_hum(s, 2592000, 3600)  # last 30 days, sensor reading every 60 min, average
-    print("** historical data collected *** ")
 
+    print("** Weather DATA *** \n")
+    put_historical_data_into_influx_weather_temp_hum() # from dec to now, weather data every hour
+    
+    print("\n\n** TEMP/HUMID DATA *** \n")
+    for s in temperature_sensors:
+        put_historical_data_into_influx_temp_hum(s, 259200, 3600)  # last 3 days, sensor reading every 60 min, average
+        
+        
+    # print("\n\n** DOORS DATA *** \n") #Problème with the API "/sensors/stats/historicalBySensor" metric="door", returns nothing
+    # for s in door_sensors:
+    #     put_historical_data_into_influx_door(s, 2592000, 60)  # last 30 days, sensor reading every min, average
+        
+        
+    print("\n\n****** HISTORICAL DATA COLLECTED ******* \n")
+    print("\n\n\n***** DATA UPDATE EVERY HOUR ****** \n\n")
     while True:
 
-        for s in temperature_sensors:
-            try:
-
+        try:
+            start = datetime.now() + timedelta(hours = -1)
+            end = datetime.now()
+            
+            # Create Point for Courbevoie
+            location = meteoPoint(48.896640253127785, 2.23684585029297, 53)
+                
+            lastHour = Hourly(location, start, end)
+            lastHour = lastHour.fetch().iloc[0]
+            
+            influx_db.write(
+                   bucket=bucket,
+                   org=org,
+                   record=Point("Weather")
+                        .tag("location", "Pôle LdV")
+                        .field("temperature", lastHour.temp)
+                        .field("humidity", lastHour.rhum)
+                        .time(lastHour.name))
+            
+            print("**last weather data added to db**")
+            
+            for s in temperature_sensors:
                 r = get_latest_sensor_reading(s, "temperature")
                 r_hum = get_latest_sensor_reading(s, "humidity")
                 r = r[0]
                 r_hum = r_hum[0]
-
                 locationTag = checkLocation(sensor_name_mapping[s])
                 influx_db.write(
                     bucket=bucket,
@@ -224,12 +279,24 @@ def main():
                         .field("temperature", r["value"])
                         .field("humidity", r_hum["value"])
                         .time(r["ts"]).tag('location', locationTag))
-                print("**added to db**")
-            except Exception as e:
-                print("Can't write to database: {}".format(e))
-
+                print(f"{get_name(r['serial'])} last data added to db**")
+           
+            for s in door_sensors:
+                opened = get_latest_sensor_reading(s, "door")
+                influx_db.write(
+                    bucket=bucket,
+                    org=org,
+                    record=Point(get_name(opened["serial"]))
+                        .field("door status", opened["value"])
+                        .time(opened["ts"]).tag('location', locationTag))
+                print(f"{get_name(opened['serial'])} last data added to db**")
+                    
+            
+        except Exception as e:
+             print("Can't write to database: {}".format(e))
+             
         print("***time for sleep***")
-        time.sleep(60)
+        time.sleep(3600)
 
 
 main()

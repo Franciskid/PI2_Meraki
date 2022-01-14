@@ -14,6 +14,7 @@ temperature_sensors = ["Q3CA-W7P5-GLWJ", "Q3CA-SPYL-SC5M", "Q3CA-T9FH-7ZF5",
 "Q3CA-Y4FD-TEM9", "Q3CA-3Q5F-ZL2T", "Q3CA-9EGL-8LQJ",  
 "Q3CA-TFU4-A8QR", "Q3CA-3Y93-LACF"]
 
+door_sensors = ["Q3CC-CHNP-XUTA", "Q3CC-7QPS-TABH"]
 
 # ================================= #
 #          INFLUX DB                #
@@ -130,5 +131,15 @@ sensor_mapping = [
         "name": "17",
         "serial": "Q3CA-3Y93-LACF",
         "type": "temperature"
+    },
+    {
+        "name": "Left door",
+        "serial": "Q3CC-CHNP-XUTA",
+        "type": "door"
+    },
+    {
+        "name": "Right door",
+        "serial": "Q3CC-7QPS-TABH",
+        "type": "door"
     }
 ]
