@@ -22,6 +22,10 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import pandas as pd
 import time
 
+
+from datetime import datetime
+from meteostat import Point as meteoPoint, Hourly
+
 # Influx DB Connector
 retries = Retry(connect=10, read=5, redirect=10)
 influx_client = InfluxDBClient(url=influx_url, token=token, org=org, retries=retries)
@@ -113,6 +117,40 @@ def get_shortened_sensor_name(sensor):
     return sensor[13:]
 
 
+def get_weather_stats():
+
+    # Set time period
+    start = datetime(2021, 12, 1)
+    end = datetime.now()
+
+    # Create Point for Courbevoie
+    location = meteoPoint(48.896640253127785, 2.23684585029297, 53)
+
+    # Get daily data for 2018
+    data = Hourly(location, start, end)
+    data = data.fetch()
+    
+    return data
+
+
+def put_historical_weather_data_into_influx_temp_hum():
+    data = get_weather_stats()
+    
+    
+    points = [Point("Weather").tag("location", "Pôle LdV").field("temperature", x.temp).field("humidity", x.rhum).time(x.Index) for x in data.itertuples(index=True)]
+    #points = [print(x) for x in df.itertuples()]
+    
+    try:
+        influx_db.write(
+            bucket=bucket,
+            org=org,
+            record=points)
+            #data_frame_measurement_name=sensor_name_mapping[sensor_serial][13:], data_frame_tag_columns=['Location'])
+        print("Weather data - Historical Temperatures/Humidity data successfully inserted.")
+    except Exception as e:
+        print(f"Weather data - can't write to database: {e}")
+    
+
 def checkLocation(sensor):
     if 'COLD' in sensor:
         return 'Cold'
@@ -142,7 +180,6 @@ def put_historical_data_into_influx_temp_hum(sensor_serial, timespan, resolution
     except Exception as e:
         print(f"{sensor_serial} - can't insert into dataframe: {e}")
     
-    global points
     points = [Point(get_name(sensor_serial)).tag("location", "L404").field("temperature", x.temperature).field("humidity", x.humidity).time(x.Index) for x in df.itertuples(index=True)]
     #points = [print(x) for x in df.itertuples()]
     
@@ -163,8 +200,11 @@ def main():
     global sensor_name_mapping
     sensor_name_mapping = get_sensor_name_mapping()
 
+    put_historical_weather_data_into_influx_temp_hum() # from dec to now, weather data every hour
+    
     for s in temperature_sensors:
         put_historical_data_into_influx_temp_hum(s, 2592000, 3600)  # last 30 days, sensor reading every 60 min, average
+    print("** historical data collected *** ")
 
     while True:
 

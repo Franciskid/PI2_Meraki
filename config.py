@@ -21,7 +21,7 @@ temperature_sensors = ["Q3CA-W7P5-GLWJ", "Q3CA-SPYL-SC5M", "Q3CA-T9FH-7ZF5",
 
 org = "merakiOrganization"
 bucket = "merakiBucket"
-token = "mGt4-g4XrPeZC1hfO4IMWi_9fTx4groCBjODkrtN6428E6vpaaRxJnvo3tkvA6dfJHc-nAb-IXrFB_x56C8y-g=="
+token = "Fpw1wZE2p5g7GhxyzHCxN58z7i8YEDnO4Vf94ZVMwa60p_zG_1-j3YeJwP0HhGPFJaWqmVkxfjIdhfNjzEh3vw=="
 influx_url = "http://localhost:8086"
 
 
