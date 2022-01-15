@@ -137,7 +137,11 @@ def put_historical_data_into_influx_weather_temp_hum():
     data = get_weather_stats()
     
     
-    points = [Point("Weather").tag("location", "Pôle LdV").field("temperature", x.temp).field("humidity", x.rhum).time(x.Index) for x in data.itertuples(index=True)]
+    points = [Point("Weather").
+              tag("location", "Pôle LdV").
+              field("temperature", x.temp).
+              field("humidity", x.rhum).
+              time(x.Index) for x in data.itertuples(index=True)]
     
     try:
         influx_db.write(
@@ -163,7 +167,10 @@ def put_historical_data_into_influx_door(sensor_serial, timespan, resolution):
         
         print (df)
         
-        points = [Point(get_name(sensor_serial)).tag("location", "L404").field("door status", x.door).time(x.Index) for x in df.itertuples(index=True)]
+        points = [Point(get_name(sensor_serial)).
+                  tag("location", "L404").
+                  field("door status", x.door).
+                  time(x.Index) for x in df.itertuples(index=True)]
         
         try:
             influx_db.write(
@@ -236,9 +243,9 @@ def main():
         put_historical_data_into_influx_temp_hum(s, 259200, 3600)  # last 3 days, sensor reading every 60 min, average
         
         
-    # print("\n\n** DOORS DATA *** \n") #Problème with the API "/sensors/stats/historicalBySensor" metric="door", returns nothing
-    # for s in door_sensors:
-    #     put_historical_data_into_influx_door(s, 2592000, 60)  # last 30 days, sensor reading every min, average
+    print("\n\n** DOORS DATA *** \n") #Problem with the API "/sensors/stats/historicalBySensor" metric="door", returns nothing
+    for s in door_sensors:
+        put_historical_data_into_influx_door(s, 2592000, 60)  # last 30 days, sensor reading every min, average
         
         
     print("\n\n****** HISTORICAL DATA COLLECTED ******* \n")
@@ -256,22 +263,21 @@ def main():
             lastHour = lastHour.fetch().iloc[0]
             
             influx_db.write(
-                   bucket=bucket,
-                   org=org,
-                   record=Point("Weather")
+                    bucket=bucket,
+                    org=org,
+                    record=Point("Weather")
                         .tag("location", "Pôle LdV")
                         .field("temperature", lastHour.temp)
                         .field("humidity", lastHour.rhum)
                         .time(lastHour.name))
             
-            print("**last weather data added to db**")
+            print("last weather data added to db**\n")
             
             for s in temperature_sensors:
-                r = get_latest_sensor_reading(s, "temperature")
-                r_hum = get_latest_sensor_reading(s, "humidity")
-                r = r[0]
-                r_hum = r_hum[0]
+                r = get_latest_sensor_reading(s, "temperature")[0]
+                r_hum = get_latest_sensor_reading(s, "humidity")[0]
                 locationTag = checkLocation(sensor_name_mapping[s])
+                
                 influx_db.write(
                     bucket=bucket,
                     org=org,
@@ -282,7 +288,9 @@ def main():
                 print(f"{get_name(r['serial'])} last data added to db**")
            
             for s in door_sensors:
-                opened = get_latest_sensor_reading(s, "door")
+                opened = get_latest_sensor_reading(s, "door")[0]
+                locationTag = checkLocation(sensor_name_mapping[s])
+                
                 influx_db.write(
                     bucket=bucket,
                     org=org,
@@ -295,7 +303,7 @@ def main():
         except Exception as e:
              print("Can't write to database: {}".format(e))
              
-        print("***time for sleep***")
+        print("\n***time for sleep***\n")
         time.sleep(3600)
 
 
