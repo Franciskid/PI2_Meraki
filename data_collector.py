@@ -16,7 +16,7 @@ import requests
 from influxdb_client import Point, InfluxDBClient
 from urllib3 import Retry
 
-from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, door_sensors, sensor_mapping
+from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket
 from config_sensors import get_sensors
 from influxdb_client.client.write_api import SYNCHRONOUS
 
