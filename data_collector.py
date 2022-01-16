@@ -17,9 +17,11 @@ from influxdb_client import Point, InfluxDBClient
 from urllib3 import Retry
 
 from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, door_sensors, sensor_mapping
+from config_sensors import get_sensors
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 import pandas as pd
+import numpy as np
 import time
 
 
@@ -31,6 +33,11 @@ retries = Retry(connect=10, read=5, redirect=10)
 influx_client = InfluxDBClient(url=influx_url, token=token, org=org, retries=retries)
 influx_db = influx_client.write_api(write_options=SYNCHRONOUS)
 
+#Retreiving sensors in network
+temperature_sensors = get_sensors("temperature")
+door_sensors = get_sensors("door")
+temperature_sensors = sorted(temperature_sensors, key=lambda d: int(d['name']))
+door_sensors = sorted(door_sensors, key=lambda d: d['name'])
 
 def get_latest_sensor_reading(sensor_serial, metric):
     """
@@ -135,12 +142,25 @@ def get_weather_stats():
 
 def put_historical_data_into_influx_weather_temp_hum():
     data = get_weather_stats()
-    
-    
+
+    #To get the sunny moments, we need to filter out all the good weather points during night time
+    #Better would be to find the exact time for each day when the sunrises and when the sunsets occur
+    #Best would be to calculate precisely when the sun hits the windows, based on the orientation of the building
+    data['time'] = pd.to_datetime(data.index)
+    data['time'] = data['time'].apply(str)
+    data['time'] = pd.to_datetime(data['time'], format='%Y-%m-%d %H:%M:%S')
+
+    data.loc[data.time.dt.hour < 8, 'coco'] = 0
+    data.loc[data.time.dt.hour > 20, 'coco'] = 0
+    data.loc[data.coco >= 3, 'coco'] = 0
+
+    data.loc[(data.coco == 1) | (data.coco == 2), 'coco'] = 1
+
     points = [Point("Weather").
               tag("location", "Pôle LdV").
               field("temperature", x.temp).
               field("humidity", x.rhum).
+              field("sunny", x.coco).
               time(x.Index) for x in data.itertuples(index=True)]
     
     try:
@@ -237,16 +257,16 @@ def main():
 
     print("** Weather DATA *** \n")
     put_historical_data_into_influx_weather_temp_hum() # from dec to now, weather data every hour
-    
+
     print("\n\n** TEMP/HUMID DATA *** \n")
     for s in temperature_sensors:
-        put_historical_data_into_influx_temp_hum(s, 259200, 3600)  # last 3 days, sensor reading every 60 min, average
-        
-        
+        put_historical_data_into_influx_temp_hum(s['serial'], 2592000, 3600)  # last 30 days, sensor reading every 60 min, average
+
+
     print("\n\n** DOORS DATA *** \n") #Problem with the API "/sensors/stats/historicalBySensor" metric="door", returns nothing
     for s in door_sensors:
-        put_historical_data_into_influx_door(s, 2592000, 60)  # last 30 days, sensor reading every min, average
-        
+        put_historical_data_into_influx_door(s['serial'], 2592000, 120)  # last 30 days, sensor reading every min, average
+
         
     print("\n\n****** HISTORICAL DATA COLLECTED ******* \n")
     print("\n\n\n***** DATA UPDATE EVERY HOUR ****** \n\n")
@@ -261,6 +281,7 @@ def main():
                 
             lastHour = Hourly(location, start, end)
             lastHour = lastHour.fetch().iloc[0]
+            coco = float(0 if lastHour.name.hour < 8 or lastHour.name.hour > 20 or lastHour.coco >= 3 else 1)
             
             influx_db.write(
                     bucket=bucket,
@@ -269,11 +290,13 @@ def main():
                         .tag("location", "Pôle LdV")
                         .field("temperature", lastHour.temp)
                         .field("humidity", lastHour.rhum)
+                        .field("sunny", coco)
                         .time(lastHour.name))
             
             print("last weather data added to db**\n")
             
-            for s in temperature_sensors:
+            for temp in temperature_sensors:
+                s = temp["serial"]
                 r = get_latest_sensor_reading(s, "temperature")[0]
                 r_hum = get_latest_sensor_reading(s, "humidity")[0]
                 locationTag = checkLocation(sensor_name_mapping[s])
@@ -284,10 +307,11 @@ def main():
                     record=Point(get_name(r["serial"]))
                         .field("temperature", r["value"])
                         .field("humidity", r_hum["value"])
-                        .time(r["ts"]).tag('location', locationTag))
+                        .time(r["ts"]).tag('location', "L404"))
                 print(f"{get_name(r['serial'])} last data added to db**")
            
-            for s in door_sensors:
+            for door in door_sensors:
+                s = door["serial"]
                 opened = get_latest_sensor_reading(s, "door")[0]
                 locationTag = checkLocation(sensor_name_mapping[s])
                 
@@ -296,7 +320,7 @@ def main():
                     org=org,
                     record=Point(get_name(opened["serial"]))
                         .field("door status", opened["value"])
-                        .time(opened["ts"]).tag('location', locationTag))
+                        .time(opened["ts"]).tag('location', "L404"))
                 print(f"{get_name(opened['serial'])} last data added to db**")
                     
             
@@ -304,7 +328,7 @@ def main():
              print("Can't write to database: {}".format(e))
              
         print("\n***time for sleep***\n")
-        time.sleep(3600)
+        time.sleep(30)
 
 
 main()

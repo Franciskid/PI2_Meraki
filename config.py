@@ -22,7 +22,7 @@ door_sensors = ["Q3CC-CHNP-XUTA", "Q3CC-7QPS-TABH"]
 
 org = "merakiOrganization"
 bucket = "merakiBucket"
-token = "Fpw1wZE2p5g7GhxyzHCxN58z7i8YEDnO4Vf94ZVMwa60p_zG_1-j3YeJwP0HhGPFJaWqmVkxfjIdhfNjzEh3vw=="
+token = "fgeUC0dWpRv-CjMNOHp790s6CbNUytD6N-46Dg0OTJctbaAXLlkdycg2EqfA9A_uB8j5p5azDV0wzfGszn0Ecg=="
 influx_url = "http://localhost:8086"
 
 
