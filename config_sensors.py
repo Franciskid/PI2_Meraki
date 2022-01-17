@@ -1,19 +1,14 @@
-# ================================= #
-# Goal is to get automatically all  #
-# sensors through the meraki api    #
-# ================================= #
+# ================================== #
+#  Goal is to get automatically all  #
+#   sensors through the meraki api   #
+# ================================== #
 
 import requests
 from config import base_url, meraki_api_key, network_id
 
 
-types = {"MT10" : "temperature", "MT20" : "door"}
+types = {"MT10": "temperature", "MT20": "door"}
 
-headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "X-Cisco-Meraki-API-Key": meraki_api_key
-    }
 
 def get_sensors(metric):
     """
@@ -24,10 +19,18 @@ def get_sensors(metric):
     for sensor in all_sensors:
         if sensor['model'] in types:
             if types[sensor['model']] == metric:
-                sensors.append({"serial" : sensor["serial"], "name" : sensor['name'], "type" : types[sensor['model']]})
+                sensors.append({"serial": sensor["serial"], "name": sensor['name'], "type": types[sensor['model']]})
     return sensors
 
 def get_sensors_list():
+    """
+    Get all the sensors
+    """
+    headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-Cisco-Meraki-API-Key": meraki_api_key
+        }
     try:
         msg = requests.request('GET',
                                f"{base_url}/networks/{network_id}/devices",
