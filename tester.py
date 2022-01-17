@@ -1,31 +1,48 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jan 14 21:58:13 2022
-
-@author: Francois
-"""
 
 import requests
-from influxdb_client import Point, InfluxDBClient
-from urllib3 import Retry
 
-from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket, temperature_sensors, door_sensors, sensor_mapping
-from influxdb_client.client.write_api import SYNCHRONOUS
+from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket
+from config_sensors import get_sensors
 
 import pandas as pd
+import numpy as np
 import time
 
 
 from datetime import datetime, timedelta
 from meteostat import Point as meteoPoint, Hourly
 
-# Influx DB Connector
-retries = Retry(connect=10, read=5, redirect=10)
-influx_client = InfluxDBClient(url=influx_url, token=token, org=org, retries=retries)
-influx_db = influx_client.write_api(write_options=SYNCHRONOUS)
 
+def get_historical_sensor_reading(sensor_serial, metric, t0, t1, resolution):
+    """
+    Get historical sensor readings from MT sensor
+    The valid resolutions are: 1, 120, 3600, 14400, 86400. The default is 120.
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-Cisco-Meraki-API-Key": meraki_api_key
+    }
 
-def get_historical_sensor_reading(sensor_serial, metric, timespan, resolution):
+    params = {
+        "serials[]": sensor_serial,
+        "metric": metric,
+        "t0": t0,
+        "t1": t1,
+        "resolution": resolution,
+        "agg": "max"
+    }
+    try:
+        msg = requests.request('GET',
+                               f"{base_url}/networks/{network_id}/sensors/stats/historicalBySensor",
+                               headers=headers, params=params)
+        if msg.ok:
+            data = msg.json()
+            return data
+    except Exception as e:
+        print("API Connection error: {}".format(e))
+
+def get_historical_sensor_reading_(sensor_serial, metric, timespan, resolution):
     """
     Get historical sensor readings from MT sensor
     The valid resolutions are: 1, 120, 3600, 14400, 86400. The default is 120.
@@ -41,7 +58,7 @@ def get_historical_sensor_reading(sensor_serial, metric, timespan, resolution):
         "metric": metric,
         "timespan": timespan,
         "resolution": resolution,
-        "agg": "sds"
+        "agg": "max"
     }
     try:
         msg = requests.request('GET',
@@ -53,54 +70,16 @@ def get_historical_sensor_reading(sensor_serial, metric, timespan, resolution):
     except Exception as e:
         print("API Connection error: {}".format(e))
 
-def get_name(serial):
-    for x in sensor_mapping:
-        if (x["serial"] == serial):
-            return x["name"]
-    return serial
 
+door_data = get_historical_sensor_reading("Q3CC-CHNP-XUTA", "door", "2022-01-17T08:40:00.000000Z", "2022-01-17T09:00:00.000000Z", 120)
+#door_data = get_historical_sensor_reading_("Q3CC-CHNP-XUTA", "door", "25920", 120)
+#temp_data = get_historical_sensor_reading("Q3CA-3Y93-LACF", "temperature", 2592000, 3600)
 
-def put_historical_data_into_influx_door(sensor_serial, timespan, resolution):
-    """
-    Insert historical data into InfluxDB - doors status
-    """
-    print(f"Saving {get_name(sensor_serial)} data into databse")
-    try:
-        doors_readings = get_historical_sensor_reading(sensor_serial, "door", timespan, resolution)
-        
-        print(doors_readings)
-        df = pd.DataFrame(doors_readings[0]["data"])
+print(door_data)
+#print(temp_data)
 
-        df = df.rename(columns={"ts": "ts", "value": "door"})
-        df = df.set_index("ts")
-        
-        print (df)
-        
-        points = [Point(get_name(sensor_serial)).tag("location", "L404").field("door status", x.door).time(x.Index) for x in df.itertuples(index=True)]
-        
-        try:
-            influx_db.write(
-                bucket=bucket,
-                org=org,
-                record=points)
-            print(f"{get_name(sensor_serial)} - Historical Temperature data successfully inserted.")
-            
-        except Exception as e:
-                print(f"{get_name(sensor_serial)} - can't write to database: {e}")
-        
-    except Exception as e:
-        print(f"{get_name(sensor_serial)} - can't insert into dataframe: {e}")
-    
-    
-for s in door_sensors:
-    put_historical_data_into_influx_door(s, 259200, 1)  # last 30 days, sensor reading every 2 min, average
-    
+df = pd.DataFrame(door_data[0]["data"])
+df = df.rename(columns={"ts": "ts", "value": "door"})
+df = df.set_index("ts")
 
-
-    
-    
-    
-    
-    
-    
-    
+print(df)#[df["door"]<=1.0])

@@ -116,6 +116,7 @@ def get_historical_sensor_reading(sensor, metric, timespan, resolution):
     except Exception as e:
         print("API Connection error: {}".format(e))
 
+
 def get_historical_weather_reading():
 
     # Set time period
@@ -177,29 +178,26 @@ def put_historical_data_into_influx_door(sensor, timespan, resolution):
     try:
         doors_readings = get_historical_sensor_reading(sensor, "door", timespan, resolution)
         df = pd.DataFrame(doors_readings[0]["data"])
-
-        df = df.rename(columns={"ts": "ts", "value": "door"})
         df = df.set_index("ts")
-        
-        print (df)
-        
+
         points = [Point(sensor['name']).
                   tag("location", "L404").
-                  field("door status", x.door).
+                  field("door_status", x.value).
                   time(x.Index) for x in df.itertuples(index=True)]
-        
+
         try:
             influx_db.write(
                 bucket=bucket,
                 org=org,
                 record=points)
-            print(f"'{sensor['name']}' sensor -  Historical Temperature data successfully inserted.\n")
+            print(f"'{sensor['name']}' sensor -  Historical Door data successfully inserted.\n")
             
         except Exception as e:
                 print(f"'{sensor['name']}' sensor - can't write to database: {e}")
         
     except Exception as e:
         print(f"'{sensor['name']}' sensor - can't insert into dataframe: {e}")
+
 
 def put_historical_data_into_influx_temp_hum(sensor, timespan, resolution):
     """
@@ -245,7 +243,7 @@ def main():
     find_network_sensors()
 
 
-    print("\n***** HISTORICAL DATA COLLECTION ****** \n\n")
+    print("***** HISTORICAL DATA COLLECTION ****** \n")
 
     print("** Weather DATA *** \n")
     put_historical_data_into_influx_weather_temp_hum() # from dec to now, weather data every hour
@@ -254,11 +252,18 @@ def main():
     for s in temperature_sensors:
         put_historical_data_into_influx_temp_hum(s, 2592000, 3600)  # last 30 days, sensor reading every 60 min, average
 
-    print("\n\n** DOORS DATA *** \n") #Problem with the API "/sensors/stats/historicalBySensor" metric="door", returns nothing
+    print("\n\n** DOORS DATA *** \n") #Problem with the API for boolean type sensors
     for s in door_sensors:
-        put_historical_data_into_influx_door(s, 2592000, 120)  # last 30 days, sensor reading every min, average
+        put_historical_data_into_influx_door(s, 2592000, 3600)
 
-    print("\n--------------------------------------- \n")
+    # for s in door_sensors:
+    #     for day in range(0, 30):
+    #         t1 = (datetime.now() + timedelta(days=-day)).isoformat("T") + "Z"
+    #         t0 = (datetime.now() + timedelta(days=-day - 1)).isoformat("T") + "Z"
+    #         print("t0: ", t0, "   t1: ", t1)
+    #         put_historical_data_into_influx_door(s, t1, t0, 120)  # last 30 days, sensor reading every hour, average. Every 2 min fails
+
+    print("\n------------------------------------------------------------------------- \n")
 
 
     print("\n******* DATA UPDATE EVERY HOUR ******** \n\n")
@@ -278,7 +283,7 @@ def main():
                         .field("sunny", lastHour.coco)
                         .time(lastHour.name))
             
-            print("last weather data added to db**\n")
+            print("**last weather data added to db\n")
 
             #Temperatures
             for temp in temperature_sensors:
@@ -292,7 +297,7 @@ def main():
                         .field("temperature", r["value"])
                         .field("humidity", r_hum["value"])
                         .time(r["ts"]).tag('location', "L404"))
-                print(f"{temp['name']} last data added to db**")
+                print(f"**'{temp['name']}' sensor last data added to db")
 
            #Humidity
             for door in door_sensors:
@@ -302,9 +307,9 @@ def main():
                     bucket=bucket,
                     org=org,
                     record=Point(door["name"])
-                        .field("door status", opened["value"])
+                        .field("door_status", opened["value"])
                         .time(opened["ts"]).tag('location', "L404"))
-                print(f"{door['name']} last data added to db**")
+                print(f"**'{door['name']}' sensor last data added to db")
                     
             
         except Exception as e:

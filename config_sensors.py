@@ -12,7 +12,7 @@ types = {"MT10": "temperature", "MT20": "door"}
 
 def get_sensors(metric):
     """
-    Get all the sensors with the specified metric "temperature", "door", "humidity"
+    Get all the sensors with the specified metric "temperature", "door"
     """
     all_sensors = get_sensors_list()
     sensors = list()

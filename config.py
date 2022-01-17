@@ -4,9 +4,9 @@
 
 base_url = "https://api.meraki.com/api/v1"
 meraki_api_key = "4cad7b04e58fba06aacd0e85d3230758a72894d3"
-network_id = "L_660340295363203930" # found it on https://api.meraki.com/api/v1/organizations/660340295363199933/networks, where 660340295363199933 is the orgid
+network_id = "L_660340295363203930"  # found it on https://api.meraki.com/api/v1/organizations/660340295363199933/networks, where 660340295363199933 is the orgid
 
-# serial numbers of the sensors, all in name order
+# serial numbers of the sensors, all in name order. Not used anymore.
 temperature_sensors = ["Q3CA-W7P5-GLWJ", "Q3CA-SPYL-SC5M", "Q3CA-T9FH-7ZF5", 
 "Q3CA-3ZRV-MNTQ", "Q3CA-RR4K-8RYS", "Q3CA-K9TR-RE3G", 
 "Q3CA-5D77-ZYLZ", "Q3CA-4ZSY-VW9J", "Q3CA-HCXU-CYW7", 
@@ -25,15 +25,6 @@ bucket = "merakiBucket"
 token = "fgeUC0dWpRv-CjMNOHp790s6CbNUytD6N-46Dg0OTJctbaAXLlkdycg2EqfA9A_uB8j5p5azDV0wzfGszn0Ecg=="
 influx_url = "http://localhost:8086"
 
-
-# ================================= #
-#            GRAFANA                #
-# ================================= #
-
-name="admin"
-password="dwQXhRHbVhE6hNR"
-token_grafana="eyJrIjoiNzRHbnhtMWsxTnE4Mmc1d3NwZ09EdUlyZllvZUZUTG4iLCJuIjoidG9rZW4iLCJpZCI6MX0="
-other="curl -H 'Authorization: Bearer eyJrIjoiNzRHbnhtMWsxTnE4Mmc1d3NwZ09EdUlyZllvZUZUTG4iLCJuIjoidG9rZW4iLCJpZCI6MX0=' http://localhost:3000/api/dashboards/home"
 
 # ================================= #
 #      ASHRAE SETTINGS              #
