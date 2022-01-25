@@ -14,8 +14,11 @@ or implied.
 
 from flask import Flask, render_template, request, url_for, json, redirect
 from config import meraki_api_key, network_id, sensor_mapping, ASHRAE_low, ASHRAE_high
+import jmespath
 import requests, threading, time, pytz
 from datetime import datetime, timedelta
+from data_collector import get_latest_sensor_reading
+from config_sensors import get_sensors
 
 app = Flask(__name__)
 alertprofiles_to_snooze = []
@@ -47,7 +50,7 @@ def heatmap():
             alertprofiles_to_snooze.remove(ap_to_snooze_delete)
 
     if sensor == None:
-
+        #no need to look for sensors, just calling 'latestBySensor' will retreive all the sensors data in the network
         logic = 0
         url = 'https://api.meraki.com/api/v0/networks/' + network_id + '/sensors/stats/latestBySensor?metric=temperature'
         headers = {
@@ -55,25 +58,11 @@ def heatmap():
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        data = {
-            "serials": []
-        }
-        for mapping in sensor_mapping:
-            data['serials'].append(mapping['serial'])
-        get_temp = requests.get(url, headers=headers, data=json.dumps(data), verify=False)
 
-        temp_values = {}
-        for temp in get_temp.json():
-            for sensor in sensor_mapping:
-                if temp['serial'] == sensor['serial']:
-                    temp_values[sensor['name']] = str(round(float(temp['value']), 2)) + ' °C'
+        temp_values = {jmespath.search(f"sensor_mapping[?(@.serial=='{x['serial']}')].name", sensor_mapping): f"{str(round(float(x['value']), 2))}°C" for x in requests.get(url, headers=headers).json()}
 
         url = 'https://api.meraki.com/api/v1/networks/' + network_id + '/sensors/alerts/profiles'
-        headers = {
-            'X-Cisco-Meraki-API-Key': meraki_api_key,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
+
         get_alert_profiles = requests.get(url, headers=headers, verify=False)
 
         for profile in get_alert_profiles.json():

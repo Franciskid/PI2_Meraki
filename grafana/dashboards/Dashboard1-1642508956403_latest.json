@@ -1,0 +1,1187 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 12,
+      "panels": [],
+      "title": "Data Now",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "super-light-red",
+                  "index": 0,
+                  "text": "Left door Closed"
+                },
+                "1": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "Left door Opened"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": ""
+              }
+            ]
+          },
+          "unit": "bool"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 27,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 0
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Left door\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"door_status\")\r\n  |> last()\r\n  |> yield()",
+          "refId": "A"
+        }
+      ],
+      "title": "Left door status",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "mappings": [],
+          "max": 40,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 4,
+        "y": 1
+      },
+      "id": 14,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"6\" or r[\"_measurement\"] == \"9\" or r[\"_measurement\"] == \"8\" or r[\"_measurement\"] == \"7\" or r[\"_measurement\"] == \"15\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"L404\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Last Temperatures",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "mappings": [],
+          "max": 40,
+          "min": -10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 20
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 3,
+        "x": 11,
+        "y": 1
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"Pôle LdV\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temp in Paris",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 31,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 6,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 20,
+          "min": -5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 1
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"Pôle LdV\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temp in Paris",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "super-light-red",
+                  "index": 0,
+                  "text": "Right door Closed"
+                },
+                "1": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "Right door Opened"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 5
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 0
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Right door\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"door_status\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"L404\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"max\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Right door status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 43,
+            "lineWidth": 0
+          },
+          "displayName": "Left door",
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "transparent",
+                  "index": 0,
+                  "text": "Closed"
+                },
+                "1": {
+                  "color": "super-light-green",
+                  "index": 1,
+                  "text": "Open"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0.1,
+                "result": {
+                  "color": "super-light-green",
+                  "index": 2,
+                  "text": "Open"
+                },
+                "to": 1
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 9
+      },
+      "id": 30,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "mergeValues": true,
+        "rowHeight": 1,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Left door\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"door_status\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"max\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Opening history",
+      "transparent": true,
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlBl"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 4,
+        "y": 10
+      },
+      "id": 16,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"6\" or r[\"_measurement\"] == \"9\" or r[\"_measurement\"] == \"8\" or r[\"_measurement\"] == \"7\" or r[\"_measurement\"] == \"15\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidity\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"L404\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Last Humidity",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlBl"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "humidity"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 3,
+        "x": 11,
+        "y": 10
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidity\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"Pôle LdV\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity in Paris",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#1F60C4",
+            "mode": "continuous-YlBl"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 29,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 5,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 10
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidity\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"Pôle LdV\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity in Paris",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 43,
+            "lineWidth": 0
+          },
+          "displayName": "Right door",
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "transparent",
+                  "index": 0,
+                  "text": "Closed"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0.1,
+                "result": {
+                  "color": "super-light-green",
+                  "index": 1,
+                  "text": "Open"
+                },
+                "to": 1
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 14
+      },
+      "id": 31,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Right door\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"door_status\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"max\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Opening history",
+      "transparent": true,
+      "type": "state-timeline"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 4,
+      "panels": [],
+      "title": "Temps/Hum  History",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "description": "16",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd",
+            "seriesBy": "max"
+          },
+          "custom": {
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Weather sunny Pôle LdV"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bool"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "transparent",
+                        "index": 1,
+                        "text": "Not sunny"
+                      },
+                      "1": {
+                        "color": "super-light-yellow",
+                        "index": 0,
+                        "text": "Sunny"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineInterpolation",
+                "value": "stepBefore"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Weather temperature Pôle LdV"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlYlRd"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"15\" or r[\"_measurement\"] == \"16\" or r[\"_measurement\"] == \"1\" or r[\"_measurement\"] == \"3\" or r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\r\n  |> filter(fn: (r) => r[\"location\"] == \"Pôle LdV\" or r[\"location\"] == \"L404\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "hide": false,
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Weather\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sunny\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Chauffage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 60,
+          "min": 15,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "humidity"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"9\" or r[\"_measurement\"] == \"8\" or r[\"_measurement\"] == \"5\" or r[\"_measurement\"] == \"10\" or r[\"_measurement\"] == \"12\" or r[\"_measurement\"] == \"11\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidity\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"merakiBucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"9\" or r[\"_measurement\"] == \"8\" or r[\"_measurement\"] == \"5\" or r[\"_measurement\"] == \"10\" or r[\"_measurement\"] == \"12\" or r[\"_measurement\"] == \"11\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 34,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Dashboard1",
+  "uid": "RuqQYt1nz",
+  "version": 14,
+  "weekStart": ""
+}
