@@ -1,9 +1,11 @@
+from token_file import meraki_api_key, influx_token
+
 # ================================= #
 #          Meraki Settings          #
 # ================================= #
 
 base_url = "https://api.meraki.com/api/v1"
-meraki_api_key = "0b4c3cfedefcb05eef9f7c4224d412995d01df25"
+meraki_api_key = meraki_api_key
 network_id = "L_660340295363203930"  # found it on https://api.meraki.com/api/v1/organizations/660340295363199933/networks, where 660340295363199933 is the orgid
 
 # serial numbers of the sensors, all in name order. Not used anymore.
@@ -22,7 +24,7 @@ door_sensors = ["Q3CC-CHNP-XUTA", "Q3CC-7QPS-TABH"]
 
 org = "merakiOrganization"
 bucket = "merakiBucket"
-token ="GP3qXPkA8ytmKHuWvwralKDJGig72Doo0DwwD8YHweE9wVdRAi_B0dlX-FAD__9S-dMt7S6Sg379XdtCvEMK2Q=="
+token = influx_token
 influx_url = "http://localhost:8086"
 
 

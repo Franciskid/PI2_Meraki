@@ -1,0 +1,3 @@
+meraki_api_key = "6fa126d7f27f684c3a2cc93e1fc763ca9dc19190"
+
+influx_token ="LZoZzBICm4BG9NgMm-j5DwZsK5Uf1RHWgKLueSXghtd_emBlXbYmcERKHgJkVaSfnpF2h6sJUduxjtc8RP29yQ=="
