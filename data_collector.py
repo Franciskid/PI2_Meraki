@@ -1,22 +1,8 @@
-"""
-Copyright (c) 2021 Cisco and/or its affiliates.
-This software is licensed to you under the terms of the Cisco Sample
-Code License, Version 1.1 (the "License"). You may obtain a copy of the
-License at
-               https://developer.cisco.com/docs/licenses
-All use of the material herein must be in accordance with the terms of
-the License. All rights not expressly granted by the License are
-reserved. Unless required by applicable law or agreed to separately in
-writing, software distributed under the License is distributed on an "AS
-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-or implied.
-"""
-
 import requests
 from influxdb_client import Point, InfluxDBClient
 from urllib3 import Retry
 
-from config import base_url, meraki_api_key, network_id, influx_url, token, org, bucket
+from config import *
 from config_sensors import get_sensors
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -35,7 +21,9 @@ influx_db = influx_client.write_api(write_options=SYNCHRONOUS)
 
 
 def find_network_sensors():
-    '''Retreiving sensors in network'''
+    """
+    Retreiving sensors in network
+    """
     print("Finding Sensors ...")
     global temperature_sensors
     global door_sensors
@@ -77,7 +65,7 @@ def get_latest_weather_reading():
     end = datetime.now()
 
     # Create Point for Courbevoie
-    location = meteoPoint(48.896640253127785, 2.23684585029297, 53)
+    location = meteoPoint(weather_location["lat"], weather_location["lon"], weather_location["alt"])
 
     lastHour = Hourly(location, start, end)
     lastHour = lastHour.fetch().iloc[0]
@@ -124,7 +112,7 @@ def get_historical_weather_reading():
     end = datetime.now()
 
     # Create Point for Courbevoie
-    location = meteoPoint(48.896640253127785, 2.23684585029297, 53)
+    location = meteoPoint(weather_location["lat"], weather_location["lon"], weather_location["alt"])
 
     # Get daily data for december till now
     data = Hourly(location, start, end)
@@ -168,7 +156,7 @@ def put_historical_data_into_influx_weather_temp_hum():
             print(f"Weather data - can't write to database: {e}")
 
     except Exception as e:
-        print(f"Weather data - can't add date to dataframe: {e}")
+        print(f"Weather data - can't add data to dataframe: {e}")
 
 def put_historical_data_into_influx_door(sensor, timespan, resolution):
     """
@@ -299,7 +287,7 @@ def main():
                         .time(r["ts"]).tag('location', "L404"))
                 print(f"**'{temp['name']}' sensor last data added to db")
 
-           #Humidity
+           #Doors
             for door in door_sensors:
                 opened = get_latest_sensor_reading(door, "door")[0]
                 
@@ -318,7 +306,7 @@ def main():
         print("\n***time for sleep***\n")
         time.sleep(30)
 
-
-main()
+if __name__ == "__main__":
+    main()
 
 

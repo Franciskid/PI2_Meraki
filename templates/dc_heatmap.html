@@ -31,7 +31,7 @@
             <span style="margin:0px 0px 0px 120px;"><a id="17" href="{{ url_for('heatmap', sensor='17') }}" style="color:white;">{{ temp_values["17"] }}</a></span>
         </row>
     </div>
-    <img src="/static/server_room.png">
+    <img src="https://meraki-eu-central-1.s3.eu-central-1.amazonaws.com/assets/660340295363199933_648574e52dddc4783895d2e1616954d7.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQWX6IRKX2AVM2FOC%2F20220125%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20220125T084014Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=5e5df40d8169f12289fdaca912b05718335ce41687c93603af201dc3546a1f43">
     <div>
         <row>
             <span style="margin:0px 0px 0px 185px;"><a id="1" href="{{ url_for('heatmap', sensor='1') }}" style="color:white;">{{ temp_values["1"] }}</a></span>
@@ -373,7 +373,7 @@
 
 <script>
     console.log({{ logic }});
-    if ({{ logic }} === 1) {
+    if ({{ logic }}  === 1) {
         var sensor_form = document.getElementById("submit_sensor_form");
         sensor_form.style.display = "inline";
         var sensor_all_form = document.getElementById("sensor_alertprofiles_all");
