@@ -3,7 +3,7 @@
 # ================================= #
 
 base_url = "https://api.meraki.com/api/v1"
-meraki_api_key = "4cad7b04e58fba06aacd0e85d3230758a72894d3"
+meraki_api_key = "4e8c23a94107f8882f2844b1b6fa87ab1d476ccd"
 network_id = "L_660340295363203930"  # found it on https://api.meraki.com/api/v1/organizations/660340295363199933/networks, where 660340295363199933 is the orgid
 floor_plan="g_660340295363201359"
 
