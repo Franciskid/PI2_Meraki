@@ -18,14 +18,23 @@ def dataframe_creation():
 def AssignTemperature(date):
     print(temp)
 
-def 
+#Compute the distance between 2 points in 3d
+def computeDistance(x_sensor,y_sensor, z_sensor, x,y,z):
+    return pow(pow(x_sensor-x,2)+pow(y_sensor-y,2)+pow(z_sensor-z,2),1/2)
 
+#Estimate the temperature of a sensor
 def estimatedTemp(x,y,z):
     temp = 0
-
+    sum_distance=0
     for i in range(len(df_sensors)):
-        temp+=
+        distance = computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],df_sensors.iloc[i,3], x,y,z)
+        temp+=distance * df_sensors.iloc[i,4]
+        sum_distance+=distance
 
+    point_temperature = temp/sum_distance
+    return point_temperature
+
+    
 #Generate points between sensors to complete the heatmap
 #These points are generated at regular intervals
 def generatesPoints(npoints):
