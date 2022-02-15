@@ -12,8 +12,8 @@ def get_average_temp(date):
     start = datetime.today() - date
     stop = (datetime.today() + timedelta(hours=1)) - date
     tables = query_api.query(f'from(bucket:"{bucket}")'
-                             f' |> range(start: -{format_date(stop)},'
-                             f' stop:{format_date(start)})'
+                             f' |> range(start: -{format_date(start)},'
+                             f' stop:{format_date(stop)})'
                              f' |> filter(fn: (r) => r["_field"] == "temperature")'
                              f' |> filter(fn: (r) => r["location"] == "L404")'
                              f' |> yield(name: "mean")')
@@ -44,4 +44,5 @@ def format_date(td):
     return f'{td.days}d{td.seconds//3600}h{(td.seconds//60)%60}m{td.seconds % 60}s'
 
 
-get_average_temp(datetime.today() + timedelta(hours=-10))
+if (__name__ == "__main__"):
+    print(get_average_temp(datetime.today() + timedelta(hours=-10)))
