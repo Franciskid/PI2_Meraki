@@ -3,17 +3,19 @@ import numpy as np
 from config import sensor_mapping
 from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url
+
 from datetime import datetime, timedelta
 from average_temp import get_average_temp
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
-def GetTemperature(date =datetime.today()):
+def GetTemperature(date =datetime.today() ):
     start = datetime.today() - date
     stop = (datetime.today() + timedelta(hours=1)) - date
     tables = query_api.query(f'from(bucket: "{bucket}")'
@@ -106,20 +108,25 @@ max_z=int(df_sensors["z"].max())
 def randrange(n, vmin, vmax):
     return (vmax-vmin)*np.random.rand(n) + vmin
 
-def heatmap_3D():
+def heatmap_3D(df):
     fig = plt.figure(figsize=(8,6))
 
     ax = fig.add_subplot(111,projection='3d')
-    n = 100
 
-    xs = randrange(n, 23, 32)
-    ys = randrange(n, 0, 100)
-    zs = randrange(n, 0, 100)
 
-    colmap = cm.ScalarMappable(cmap=cm.hsv)
-    colmap.set_array(zs)
+    xs = df["x"].tolist()
+    ys = df["y"].tolist()
+    zs = df["z"].tolist()
+    temperature= df["temperature"].tolist()
 
-    yg = ax.scatter(xs, ys, zs, c=cm.hsv(zs/max(zs)), marker='o')
+    colors = cm.coolwarm(np.asarray(temperature)/max(temperature))
+
+
+
+    colmap = cm.ScalarMappable(cmap=cm.coolwarm)
+    colmap.set_array(temperature)
+
+    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.1, s=500)
     cb = fig.colorbar(colmap)
 
     ax.set_xlabel('X Label')
@@ -131,6 +138,6 @@ def heatmap_3D():
 
 if __name__=="__main__":
 
-    df_heatmap=generatesPoints(50)
+    df_heatmap=generatesPoints(1000)
     print(df_heatmap.head(200))
-    #heatmap_3D()
+    heatmap_3D(df_heatmap)
