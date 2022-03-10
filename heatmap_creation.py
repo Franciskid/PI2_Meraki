@@ -15,16 +15,18 @@ from datetime import datetime
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
-def GetTemperature(date =datetime.today() ):
+def GetTemperature(date=datetime.today() + timedelta(hours=-10)):
     start = datetime.today() - date
+    print(format_date(start))
     stop = (datetime.today() + timedelta(hours=1)) - date
+    print(format_date(stop))
     tables = query_api.query(f'from(bucket: "{bucket}")'
                  f'|> range(start: -{format_date(stop)},'
                  f' stop: {format_date(start)})'
-                 f'|> filter(fn: (r) => r["_measurement"] == "1" or r["_measurement"] == "10" or r["_measurement"] == "11" or r["_measurement"] == "12" or r["_measurement"] == "13" or r["_measurement"] == "14" or r["_measurement"] == "15" or r["_measurement"] == "16" or r["_measurement"] == "17" or r["_measurement"] == "2" or r["_measurement"] == "3" or r["_measurement"] == "4" or r["_measurement"] == "5" or r["_measurement"] == "9" or r["_measurement"] == "8" or r["_measurement"] == "6" or r["_measurement"] == "7")'
                  f'|> filter(fn: (r) => r["_field"] == "temperature")'
                  f'|> filter(fn: (r) => r["location"] == "L404")'
                  f'|> yield(name: "mean")')
+
 
     values = {}
     for table in tables:
@@ -32,10 +34,8 @@ def GetTemperature(date =datetime.today() ):
             if (record.get_measurement() not in values):
                 values[record.get_measurement()] = record.get_value()
 
-    #for key, value in values.items():
-        #print(key, ' : ', value)
 
-
+    print(values)
     return values
 
 #Create a dataframe with thename the coordinates and the temperature of the sensors
@@ -51,7 +51,8 @@ def dataframe_creation():
 #Put temperature of the sensors in the df
 def AssignTemperature(date=datetime.today()):
     average_temp =get_average_temp(date)
-    temp=GetTemperature(date)
+    temp=GetTemperature()
+    print(temp)
     for i in range(len(df_sensors)):
         if str(i) in temp :
             df_sensors.iloc[i,4]=temp[str(i)]
@@ -139,5 +140,5 @@ def heatmap_3D(df):
 if __name__=="__main__":
 
     df_heatmap=generatesPoints(1000)
-    print(df_heatmap.head(200))
+    print(df_heatmap.head(20))
     heatmap_3D(df_heatmap)
