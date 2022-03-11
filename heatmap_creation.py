@@ -15,7 +15,7 @@ from datetime import datetime
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
-def GetTemperature(date=datetime.today() + timedelta(hours=-10)):
+def GetTemperature(date=datetime.today() + timedelta(hours=-0.5)):
     start = datetime.today() - date
     print(format_date(start))
     stop = (datetime.today() + timedelta(hours=1)) - date
@@ -35,7 +35,7 @@ def GetTemperature(date=datetime.today() + timedelta(hours=-10)):
                 values[record.get_measurement()] = record.get_value()
 
 
-    print(values)
+
     return values
 
 #Create a dataframe with thename the coordinates and the temperature of the sensors
@@ -49,13 +49,15 @@ def dataframe_creation():
     return df
 
 #Put temperature of the sensors in the df
-def AssignTemperature(date=datetime.today()):
-    average_temp =get_average_temp(date)
+def AssignTemperature():
+    average_temp =get_average_temp(datetime.today())
+    print(average_temp)
     temp=GetTemperature()
-    print(temp)
+
+
     for i in range(len(df_sensors)):
-        if str(i) in temp :
-            df_sensors.iloc[i,4]=temp[str(i)]
+        if str(i+1) in temp :
+            df_sensors.iloc[i,4]=temp[str(i+1)]
         else :
             df_sensors.iloc[i,4]=average_temp
 
@@ -65,13 +67,13 @@ def computeDistance(x_sensor,y_sensor, z_sensor, x,y,z):
     return pow(pow(x_sensor-x,2)+pow(y_sensor-y,2)+pow(z_sensor-z,2),1/2)
 
 #Estimate the temperature of a sensor
-def estimatedTemp(x,y,z):
+def estimatedTemp(x,y,z,power):
     temp = 0
     sum_distance=0
     for i in range(len(df_sensors)):
         distance = computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],df_sensors.iloc[i,3], x,y,z)
-        temp+=distance * df_sensors.iloc[i,4]
-        sum_distance+=distance
+        temp+=pow(1/distance,power) * df_sensors.iloc[i,4]
+        sum_distance+=pow(1/distance,power)
 
     point_temperature = temp/sum_distance
     return point_temperature
@@ -89,7 +91,7 @@ def generatesPoints(npoints):
     for x in range(min_x,max_x,interval):
         for y in range(min_y, max_y,interval):
             for z in range(min_z,max_z,interval):
-                df_heatmap=df_heatmap.append({"name_sensor":"generated_point","x":x,"y":y,"z":z,"temperature":estimatedTemp(x,y,z)}, ignore_index=True)
+                df_heatmap=df_heatmap.append({"name_sensor":"generated_point","x":x,"y":y,"z":z,"temperature":estimatedTemp(x,y,z,15)}, ignore_index=True)
 
 
 
@@ -127,7 +129,7 @@ def heatmap_3D(df):
     colmap = cm.ScalarMappable(cmap=cm.coolwarm)
     colmap.set_array(temperature)
 
-    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.1, s=500)
+    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.1, s=2000)
     cb = fig.colorbar(colmap)
 
     ax.set_xlabel('X Label')
@@ -139,6 +141,6 @@ def heatmap_3D(df):
 
 if __name__=="__main__":
 
-    df_heatmap=generatesPoints(1000)
-    print(df_heatmap.head(20))
+    df_heatmap=generatesPoints(300)
+    print(df_heatmap.head(25))
     heatmap_3D(df_heatmap)
