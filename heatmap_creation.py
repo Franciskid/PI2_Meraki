@@ -17,9 +17,7 @@ query_api = client.query_api()
 
 def GetTemperature(date=datetime.today() + timedelta(hours=-0.5)):
     start = datetime.today() - date
-    print(format_date(start))
     stop = (datetime.today() + timedelta(hours=1)) - date
-    print(format_date(stop))
     tables = query_api.query(f'from(bucket: "{bucket}")'
                  f'|> range(start: -{format_date(stop)},'
                  f' stop: {format_date(start)})'
@@ -51,7 +49,7 @@ def dataframe_creation():
 #Put temperature of the sensors in the df
 def AssignTemperature():
     average_temp =get_average_temp(datetime.today())
-    print(average_temp)
+    print("Average temperature : ",average_temp)
     temp=GetTemperature()
 
 
@@ -90,9 +88,8 @@ def generatesPoints(npoints):
 
     for x in range(min_x,max_x,interval):
         for y in range(min_y, max_y,interval):
-            for z in range(min_z,max_z,interval):
+            for z in range(min_z,max_z,int(interval/2)):
                 df_heatmap=df_heatmap.append({"name_sensor":"generated_point","x":x,"y":y,"z":z,"temperature":estimatedTemp(x,y,z,15)}, ignore_index=True)
-
 
 
     return df_heatmap
@@ -121,15 +118,14 @@ def heatmap_3D(df):
     ys = df["y"].tolist()
     zs = df["z"].tolist()
     temperature= df["temperature"].tolist()
+    temperature2 =list(map(lambda x : x-2, temperature))
 
-    colors = cm.coolwarm(np.asarray(temperature)/max(temperature))
-
-
+    colors = cm.coolwarm((np.asarray(temperature)-min(temperature))/((max(temperature)-min(temperature))))
+    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.05, s=2000)
 
     colmap = cm.ScalarMappable(cmap=cm.coolwarm)
     colmap.set_array(temperature)
 
-    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.1, s=2000)
     cb = fig.colorbar(colmap)
 
     ax.set_xlabel('X Label')
@@ -142,5 +138,4 @@ def heatmap_3D(df):
 if __name__=="__main__":
 
     df_heatmap=generatesPoints(300)
-    print(df_heatmap.head(25))
     heatmap_3D(df_heatmap)
