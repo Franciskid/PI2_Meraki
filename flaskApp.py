@@ -12,13 +12,14 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 """
 
-from flask import Flask, render_template, request, url_for, json, redirect
+from flask import Flask, render_template, request, url_for, json, redirect,send_file
 from config import meraki_api_key, network_id, sensor_mapping, ASHRAE_low, ASHRAE_high
 import jmespath
 import requests, threading, time, pytz
 from datetime import datetime, timedelta
 from data_collector import get_latest_sensor_reading
 from config_sensors import get_sensors
+from heatmap_creation import get_heatmap
 
 app = Flask(__name__)
 alertprofiles_to_snooze = []
@@ -28,7 +29,7 @@ alertprofiles_to_snooze = []
 def index():
     return render_template("start_page.html")
 
-
+"""
 @app.route('/heatmap', methods=['GET', 'POST'])
 def heatmap():
     global temp_values
@@ -126,7 +127,13 @@ def heatmap():
     return render_template("dc_heatmap.html", temp_values=temp_values, logic=logic, alert_profiles=alert_profiles,
                            alert_profiles_overview=alert_profiles_overview, sensor=sensor, ASHRAE_low=ASHRAE_low,
                            ASHRAE_high=ASHRAE_high, alertprofiles_to_snooze=alertprofiles_to_snooze)
+"""
 
+@app.route('/heatmap', methods=['GET', 'POST'])
+def heatmap():
+    heatmap = get_heatmap()
+
+    return render_template("heatmap.html")
 
 @app.route('/snooze_sensors', methods=['GET', 'POST'])
 def snooze_sensors():

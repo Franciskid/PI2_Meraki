@@ -10,6 +10,7 @@ from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from datetime import datetime
+import io
 
 
 client = InfluxDBClient(url=influx_url, token=token, org=org)
@@ -52,7 +53,7 @@ def AssignTemperature():
     print("Average temperature : ",average_temp)
     temp=GetTemperature()
 
-
+    print("temp:",temp)
     for i in range(len(df_sensors)):
         if str(i+1) in temp :
             df_sensors.iloc[i,4]=temp[str(i+1)]
@@ -64,6 +65,8 @@ def AssignTemperature():
 def computeDistance(x_sensor,y_sensor, z_sensor, x,y,z):
     return pow(pow(x_sensor-x,2)+pow(y_sensor-y,2)+pow(z_sensor-z,2),1/2)
 
+
+
 #Estimate the temperature of a sensor
 def estimatedTemp(x,y,z,power):
     temp = 0
@@ -72,6 +75,7 @@ def estimatedTemp(x,y,z,power):
         distance = computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],df_sensors.iloc[i,3], x,y,z)
         temp+=pow(1/distance,power) * df_sensors.iloc[i,4]
         sum_distance+=pow(1/distance,power)
+
 
     point_temperature = temp/sum_distance
     return point_temperature
@@ -97,6 +101,7 @@ def generatesPoints(npoints):
 df_heatmap=pd.DataFrame()
 df_sensors=dataframe_creation()
 AssignTemperature()
+df_sensors=df_sensors.dropna()
 
 min_x=int(df_sensors["x"].min())
 min_y=int(df_sensors["y"].min())
@@ -133,9 +138,27 @@ def heatmap_3D(df):
     ax.set_zlabel('Z Label')
 
 
+
+    plt.savefig('./static/assets/img/3dHeatmap.png')
+    """
     plt.show()
+    bytes_image=io.BytesIO()
+    plt.savefig(bytes_image,format="png")
+    bytes_image.seek(0)
+    #plt.show()
+    return bytes_image
+    """
 
-if __name__=="__main__":
 
+def get_heatmap():
     df_heatmap=generatesPoints(300)
-    heatmap_3D(df_heatmap)
+    print(df_heatmap.head(30))
+    print("test :",df_heatmap.iloc[7,4])
+    return heatmap_3D(df_heatmap)
+
+
+
+"""
+if __name__=="__main__":
+    print(heatmap_creation())
+"""
