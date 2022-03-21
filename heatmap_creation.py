@@ -3,13 +3,8 @@ import numpy as np
 from config import sensor_mapping
 from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url
-<<<<<<< HEAD
-from datetime import timedelta
-from datetime import datetime as dt
-=======
 
 from datetime import datetime, timedelta
->>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
 from average_temp import get_average_temp
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
@@ -22,15 +17,9 @@ from PIL import Image
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
-<<<<<<< HEAD
-def GetTemperature(date =dt.today()):
-    start = dt.today() - date
-    stop = (dt.today() + timedelta(hours=1)) - date
-=======
 def GetTemperature(date=datetime.today() + timedelta(hours=-0.5)):
     start = datetime.today() - date
     stop = (datetime.today() + timedelta(hours=1)) - date
->>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
     tables = query_api.query(f'from(bucket: "{bucket}")'
                  f'|> range(start: -{format_date(stop)},'
                  f' stop: {format_date(start)})'
@@ -45,11 +34,6 @@ def GetTemperature(date=datetime.today() + timedelta(hours=-0.5)):
             if (record.get_measurement() not in values):
                 values[record.get_measurement()] = record.get_value()
 
-<<<<<<< HEAD
-    for key, value in values.items():
-        print(key, ' : ', value)
-=======
->>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
 
 
     return values
