@@ -147,19 +147,6 @@ def heatmap_3D(df):
     fig = plt.figure(figsize=(8,6))
 
     ax = fig.add_subplot(111,projection='3d')
-<<<<<<< HEAD
-    n = 10000
-
-    xs = df_heatmap["x"].tolist()
-    ys = df_heatmap["y"].tolist()
-    zs = df_heatmap["z"].tolist()
-    temperature= df_heatmap["temperature"].tolist()
-
-    colmap = cm.ScalarMappable(cmap=cm.coolwarm)
-    colmap.set_array(temperature)
-
-    yg = ax.scatter(xs, ys, zs, c=colmap, marker='o')
-=======
 
 
     xs = df["x"].tolist()
@@ -174,7 +161,6 @@ def heatmap_3D(df):
     colmap = cm.ScalarMappable(cmap=cm.coolwarm)
     colmap.set_array(temperature)
 
->>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
     cb = fig.colorbar(colmap)
 
 
@@ -201,11 +187,4 @@ def get_heatmap():
 
 
 if __name__=="__main__":
-<<<<<<< HEAD
-    print("")
-    df_heatmap=generatesPoints(1000)
-    #print(df_heatmap.head(200))
-    heatmap_3D()
-=======
     get_heatmap()
->>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
