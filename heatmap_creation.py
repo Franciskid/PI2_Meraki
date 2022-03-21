@@ -51,10 +51,8 @@ def dataframe_creation():
 #Put temperature of the sensors in the df
 def AssignTemperature():
     average_temp =get_average_temp(datetime.today())
-    print("Average temperature : ",average_temp)
     temp=GetTemperature()
 
-    print("temp:",temp)
     for i in range(len(df_sensors)):
         if str(i+1) in temp :
             df_sensors.iloc[i,4]=temp[str(i+1)]
@@ -138,6 +136,7 @@ def heatmap_2D(nbpoints):
 
     plt.savefig('./static/assets/img/2dHeatmap.png')
 
+
     img=Image.open("./static/assets/img/2dHeatmap.png")
     img=img.resize((800,600),Image.ANTIALIAS)
     img.save("./static/assets/img/2dHeatmap.png")
@@ -169,14 +168,7 @@ def heatmap_3D(df):
     ax.set_zlabel('Z coordinates (cm)')
     ax.set_title('3D corner view')
     plt.savefig('./static/assets/img/3dHeatmap.png')
-    """
-    plt.show()
-    bytes_image=io.BytesIO()
-    plt.savefig(bytes_image,format="png")
-    bytes_image.seek(0)
-    #plt.show()
-    return bytes_image
-    """
+
 
 
 def get_heatmap():

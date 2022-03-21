@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Energy management{% endblock %}
+
+{% block pageTitle %}Energy management{% endblock %}
+
+{% block section1title %}<h2>Energy management</h2>{% endblock %}
+
+{% block section1content %}
+<div>
+    <img src="../static/assets/img/energy_savings/inside_outside_temp.png">
+    <img src="../static/assets/img/energy_savings/dif_inside_outside_temp.png">
+    <img src="../static/assets/img/energy_savings/estimated_consumption.png" >
+    <span>{{optimum_reduction}}</span>
+    <img src="../static/assets/img/energy_savings/estimated_energy_savings.png" >
+    <img src="../static/assets/img/energy_savings/estimated_money_savings.png" >
+    <span>{{weekly_energy_expenses}}</span>
+
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}

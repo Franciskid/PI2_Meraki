@@ -147,6 +147,12 @@
                                         <span>Grafana Chart</span>
                                     </a>
                                 </li>
+                                <li class="sidebar__item selected">
+                                    <a tabindex="0" title="Energy Management" href="{{ url_for('energy_management')}}" onclick="showMVSenseDiv()">
+                                        <span class="icon-draggable"></span>
+                                        <span>Energy Management</span>
+                                    </a>
+                                </li>
 
                             </ul>
                         </li>
@@ -165,7 +171,7 @@
                             <div class="col-xl-12">
                                 <div class="panel panel--loose panel--raised base-margin-bottom">
                                     <h2 class="subtitle">{% block section1title %}{% endblock %}</h2>
-                                    
+
                                     <div id="loading" class=row>
 
                                         <div class="alert alert--info">
@@ -177,11 +183,11 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    
+
                                     </div>
 
 
-                                            
+
                                     <hr>
                                     <div class="section">
                                         {% block section1content %}{% endblock %}

@@ -68,39 +68,42 @@ def get_outside_temp_over_last_days(ndays):
 
 
 def inside_outside_temp_evolution_plot():
-
-    plt.plot(days, inside_temp_by_days, color='red', marker='o')
-    plt.plot(days, outside_temp_by_days, color='blue', marker='o')
-    plt.title('Average inside and outside temperature', fontsize=14)
-    plt.xlabel('Date', fontsize=14)
-    plt.xticks(rotation=25)
-    plt.ylabel('Temperature in degrees Celsius', fontsize=14)
-    plt.legend(["Inside temp","Outside temp"])
-    plt.grid(True)
+    fig,ax=plt.subplots()
+    ax.plot(days, inside_temp_by_days, color='red', marker='o')
+    ax.plot(days, outside_temp_by_days, color='blue', marker='o')
+    ax.set_title('Average inside and outside temperature', fontsize=14)
+    ax.set_xlabel('Date', fontsize=14)
+    ax.set_xticks(days,rotation=25)
+    ax.set_ylabel('Temperature in degrees Celsius', fontsize=14)
+    ax.legend(["Inside temp","Outside temp"])
+    ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/inside_outside_temp.png')
+
 
 
 #Plot of the difference of degrees between inside and outside temperature during the week
 def dif_inside_outside_temp():
-
-    plt.plot(days, dif, color='green', marker='o')
-    plt.title('Difference of degrees between \nthe inside and outside temperature', fontsize=14)
-    plt.xlabel('Date', fontsize=14)
-    plt.xticks(rotation=25)
-    plt.ylabel('Difference in degrees Celsius', fontsize=14)
-    plt.grid(True)
+    fig,ax=plt.subplots()
+    ax.plot(days, dif, color='green', marker='o')
+    ax.set_title('Difference of degrees between \nthe inside and outside temperature', fontsize=14)
+    ax.set_xlabel('Date', fontsize=14)
+    ax.set_xticks(days,rotation=25)
+    ax.set_ylabel('Difference in degrees Celsius', fontsize=14)
+    ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/dif_inside_outside_temp.png')
 
 
-def energy_consumption_by_days():
 
-    plt.plot(days, consumption, color='brown', marker='o')
-    plt.title('Estimated consumption by days', fontsize=14)
-    plt.xlabel('Date', fontsize=14)
-    plt.xticks(rotation=25)
-    plt.ylabel('Consumption in kwh', fontsize=14)
-    plt.grid(True)
+def energy_consumption_by_days():
+    fig,ax=plt.subplots()
+    ax.plot(days, consumption, color='brown', marker='o')
+    ax.set_title('Estimated consumption by days', fontsize=14)
+    ax.set_xlabel('Date', fontsize=14)
+    ax.set_xticks(days,rotation=25)
+    ax.set_ylabel('Consumption in kwh', fontsize=14)
+    ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/estimated_consumption.png')
+
 
 
 def compute_energy_expenses_over_week():
@@ -162,26 +165,39 @@ def compute_optimum_reduction():
     return round(temp_inside_average -optimum_temp,1)
 
 def plot_energy_savings_by_temp():
-
-    plt.plot([-i for i in range(5)], energy_savings, color='g', marker='o')
-    plt.title('Estimated energy savings by degrees decreased in the room', fontsize=14)
-    plt.xlabel('Degrees reduction in celsius', fontsize=14)
-    plt.xticks(rotation=25)
-    plt.ylabel('Energy saved by week in kwh', fontsize=14)
-    plt.grid(True)
+    fig,ax=plt.subplots()
+    ax.plot([-i for i in range(5)], energy_savings, color='g', marker='o')
+    ax.set_title('Estimated energy savings by degrees decreased in the room', fontsize=14)
+    ax.set_xlabel('Degrees reduction in celsius', fontsize=14)
+    ax.set_xticks([-i for i in range(5)],rotation=25)
+    ax.set_ylabel('Energy saved by week in kwh', fontsize=14)
+    ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/estimated_energy_savings.png')
 
 
+
 def plot_money_saved_by_temp():
-    plt.plot([-i for i in range(5)], money_savings, color='g', marker='o')
-    plt.title('Estimated energy savings by degrees decreased in the room', fontsize=14)
-    plt.xlabel('Degrees reduction in celsius', fontsize=14)
-    plt.xticks(rotation=25)
-    plt.ylabel('Money saved by week in euros', fontsize=14)
-    plt.grid(True)
+    fig,ax=plt.subplots()
+    ax.plot([-i for i in range(5)], money_savings, color='g', marker='o')
+    ax.set_title('Estimated energy savings by degrees decreased in the room', fontsize=14)
+    ax.set_xlabel('Degrees reduction in celsius', fontsize=14)
+    ax.set_xticks([-i for i in range(5)], rotation=25)
+    ax.set_ylabel('Money saved by week in euros', fontsize=14)
+    ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/estimated_money_savings.png')
 
 
+
+def get_energy_infos():
+    #dif_inside_outside_temp()
+    inside_outside_temp_evolution_plot()
+    energy_consumption_by_days()
+    weekly_energy_expenses = compute_energy_expenses_over_week()
+    plot_energy_savings_by_temp()
+    plot_money_saved_by_temp()
+    optimum_reduction = compute_optimum_reduction()
+    return optimum_reduction, weekly_energy_expenses
+"""
 if (__name__ == "__main__"):
     print("Obervations : ")
     dif_inside_outside_temp()
@@ -193,3 +209,4 @@ if (__name__ == "__main__"):
     plot_energy_savings_by_temp()
     plot_money_saved_by_temp()
     print("The optimum temperature in an office is ",optimum_temp,"°C so we advice you to change the temperature by ",compute_optimum_reduction(),"°C")
+"""
