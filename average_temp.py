@@ -9,20 +9,14 @@ client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
 def get_average_temp(date):
-    start = datetime.today() - date
-    stop = (datetime.today() + timedelta(hours=1)) - date
-    tables = query_api.query(f'from(bucket:"{bucket}")'
-                             f' |> range(start: -{format_date(start)},'
-                             f' stop:{format_date(stop)})'
-                             f' |> filter(fn: (r) => r["_field"] == "temperature")'
-                             f' |> filter(fn: (r) => r["location"] == "L404")'
-                             f' |> yield(name: "mean")')
+    return get_average_temp_hum(date, 'temperature')
 
-    values = {}
-    for table in tables:
-        for record in table.records:
-            if (record.get_measurement() not in values):
-                values[record.get_measurement()] = record.get_value()
+def get_average_hum(date):
+    return get_average_temp_hum(date, 'humidity')
+
+
+def get_average_temp_hum(date, metric):
+    values = get_latest_reading(date, metric)
 
     #for key, value in values.items():
         #print(key, ' : ', value)
@@ -42,6 +36,25 @@ def get_average_temp(date):
 
 def format_date(td):
     return f'{td.days}d{td.seconds//3600}h{(td.seconds//60)%60}m{td.seconds % 60}s'
+
+
+def get_latest_reading(date, metric):
+    start = datetime.today() - date
+    stop = (datetime.today() + timedelta(hours=1)) - date
+    tables = query_api.query(f'from(bucket:"{bucket}")'
+                             f' |> range(start: -{format_date(start)},'
+                             f' stop:{format_date(stop)})'
+                             f' |> filter(fn: (r) => r["_field"] == "{metric}")'
+                             f' |> filter(fn: (r) => r["location"] == "L404")'
+                             f' |> yield(name: "mean")')
+
+    values = {}
+    for table in tables:
+        for record in table.records:
+            if (record.get_measurement() not in values):
+                values[record.get_measurement()] = record.get_value()
+
+    return values
 
 
 if (__name__ == "__main__"):
