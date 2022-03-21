@@ -12,21 +12,31 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 """
 
-from flask import Flask, render_template, request, url_for, json, redirect,send_file
-from config import meraki_api_key, network_id, sensor_mapping, ASHRAE_low, ASHRAE_high
-import jmespath
-import requests, threading, time, pytz
+import threading
+import time
 from datetime import datetime, timedelta
-from data_collector import get_latest_sensor_reading
+
+import jmespath
+import pytz
+import requests
+from flask import (Flask, json, flash, redirect, render_template, request, send_file,
+                   url_for)
+
+from config import (ASHRAE_high, ASHRAE_low, meraki_api_key, network_id,
+                    sensor_mapping)
 from config_sensors import get_sensors
+from alert_profiles import alerts
+from data_collector import get_latest_sensor_reading
 from heatmap_creation import get_heatmap
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 alertprofiles_to_snooze = []
 
 
 @app.route('/', methods=['GET'])
 def index():
+    flash(alerts())
     return render_template("start_page.html")
 
 """
@@ -559,6 +569,11 @@ def add_alertprofile():
 def grafana_chart():
     content = 'Grafana Chart'
     return render_template("grafana_import.html", content=content)
+
+@app.route('/', methods=['GET', 'POST'])
+def alert():
+  flash(alerts())
+  return render_template("start_page.html")
 
 
 if __name__ == "__main__":
