@@ -8,11 +8,19 @@
 
 {% block section1content %}
 
+<h5><em>{% block section2title %}ALERTS{% endblock %}</em></h5>
 
-<div>
-    {% for mesg in get_flashed_messages() %}
-    <h1>{{ mesg }}</h1>
+<p><b>
+<div class="container">
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        {{ message }}
+    </div>
     {% endfor %}
+
+    {% block page_content %}{% endblock %}
 </div>
+</b>
+</p>
 
 {% endblock %}
