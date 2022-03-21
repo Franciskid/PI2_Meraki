@@ -3,20 +3,34 @@ import numpy as np
 from config import sensor_mapping
 from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url
+<<<<<<< HEAD
 from datetime import timedelta
 from datetime import datetime as dt
+=======
+
+from datetime import datetime, timedelta
+>>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
 from average_temp import get_average_temp
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from datetime import datetime
+import io
+from PIL import Image
 
 
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
+<<<<<<< HEAD
 def GetTemperature(date =dt.today()):
     start = dt.today() - date
     stop = (dt.today() + timedelta(hours=1)) - date
+=======
+def GetTemperature(date=datetime.today() + timedelta(hours=-0.5)):
+    start = datetime.today() - date
+    stop = (datetime.today() + timedelta(hours=1)) - date
+>>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
     tables = query_api.query(f'from(bucket: "{bucket}")'
                  f'|> range(start: -{format_date(stop)},'
                  f' stop: {format_date(start)})'
@@ -24,14 +38,18 @@ def GetTemperature(date =dt.today()):
                  f'|> filter(fn: (r) => r["location"] == "L404")'
                  f'|> yield(name: "mean")')
 
+
     values = {}
     for table in tables:
         for record in table.records:
             if (record.get_measurement() not in values):
                 values[record.get_measurement()] = record.get_value()
 
+<<<<<<< HEAD
     for key, value in values.items():
         print(key, ' : ', value)
+=======
+>>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
 
 
     return values
@@ -47,12 +65,15 @@ def dataframe_creation():
     return df
 
 #Put temperature of the sensors in the df
-def AssignTemperature(date=dt.today()):
-    average_temp =get_average_temp(date)
-    temp=GetTemperature(date)
+def AssignTemperature():
+    average_temp =get_average_temp(datetime.today())
+    print("Average temperature : ",average_temp)
+    temp=GetTemperature()
+
+    print("temp:",temp)
     for i in range(len(df_sensors)):
-        if str(i) in temp :
-            df_sensors.iloc[i,4]=temp[str(i)]
+        if str(i+1) in temp :
+            df_sensors.iloc[i,4]=temp[str(i+1)]
         else :
             df_sensors.iloc[i,4]=average_temp
 
@@ -61,23 +82,29 @@ def AssignTemperature(date=dt.today()):
 def computeDistance(x_sensor,y_sensor, z_sensor, x,y,z):
     return pow(pow(x_sensor-x,2)+pow(y_sensor-y,2)+pow(z_sensor-z,2),1/2)
 
+
+
 #Estimate the temperature of a sensor
-def estimatedTemp(x,y,z):
+def estimatedTemp(x,y,z,power):
     temp = 0
     sum_distance=0
     for i in range(len(df_sensors)):
-        distance = computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],df_sensors.iloc[i,3], x,y,z)
-        temp+=distance * df_sensors.iloc[i,4]
-        sum_distance+=distance
+        if z !=None :
+            distance = computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],df_sensors.iloc[i,3], x,y,z)
+        else :
+            distance=computeDistance(df_sensors.iloc[i,1],df_sensors.iloc[i,2],0,x,y,0)
+        temp+=pow(1/distance,power) * df_sensors.iloc[i,4]
+        sum_distance+=pow(1/distance,power)
 
     point_temperature = temp/sum_distance
     return point_temperature
 
 def format_date(td):
     return f'{td.days}d{td.seconds//3600}h{(td.seconds//60)%60}m{td.seconds % 60}s'
+
 #Generate points between sensors to complete the heatmap
 #These points are generated at regular intervals
-def generatesPoints(npoints):
+def generatesPoints3D(npoints):
     df_heatmap=df_sensors.copy()
 
     volume = (max_x -min_x)*(max_y - min_y)*(max_z-min_z)
@@ -85,9 +112,8 @@ def generatesPoints(npoints):
 
     for x in range(min_x,max_x,interval):
         for y in range(min_y, max_y,interval):
-            for z in range(min_z,max_z,interval):
-                df_heatmap=df_heatmap.append({"name_sensor":"generated_point","x":x,"y":y,"z":z,"temperature":estimatedTemp(x,y,z)}, ignore_index=True)
-
+            for z in range(min_z,max_z,int(interval/2)):
+                df_heatmap=df_heatmap.append({"name_sensor":"generated_point","x":x,"y":y,"z":z,"temperature":estimatedTemp(x,y,z,10)}, ignore_index=True)
 
 
     return df_heatmap
@@ -95,6 +121,7 @@ def generatesPoints(npoints):
 df_heatmap=pd.DataFrame()
 df_sensors=dataframe_creation()
 AssignTemperature()
+df_sensors=df_sensors.dropna()
 
 min_x=int(df_sensors["x"].min())
 min_y=int(df_sensors["y"].min())
@@ -106,10 +133,37 @@ max_z=int(df_sensors["z"].max())
 def randrange(n, vmin, vmax):
     return (vmax-vmin)*np.random.rand(n) + vmin
 
-def heatmap_3D():
+def heatmap_2D(nbpoints):
+    x,y=np.meshgrid(np.linspace(min_x,max_x,int(nbpoints**0.5)),np.linspace(min_y,max_y,int(nbpoints**0.5)))
+    temp=estimatedTemp(x,y,None,4)
+    temp_min, temp_max = -np.abs(temp).max(), np.abs(temp).max()
+
+    img=Image.open("./IMAGES/floor plan.png")
+
+    img=img.resize((int(max_x),int(max_y)),Image.ANTIALIAS)
+    fig, ax = plt.subplots()
+
+    c = ax.pcolormesh(x, y, temp, cmap='coolwarm', alpha=0.5)
+    ax.set_title('2D Top view')
+    # set the limits of the plot to the limits of the data
+    ax.axis([x.min(), x.max(), y.min(), y.max()])
+    fig.colorbar(c, ax=ax)
+    ax.imshow(img)
+    ax.set_xlabel('X coordinates (cm)')
+    ax.set_ylabel('Y coordinates (cm)')
+
+    plt.savefig('./static/assets/img/2dHeatmap.png')
+
+    img=Image.open("./static/assets/img/2dHeatmap.png")
+    img=img.resize((800,600),Image.ANTIALIAS)
+    img.save("./static/assets/img/2dHeatmap.png")
+
+
+def heatmap_3D(df):
     fig = plt.figure(figsize=(8,6))
 
     ax = fig.add_subplot(111,projection='3d')
+<<<<<<< HEAD
     n = 10000
 
     xs = df_heatmap["x"].tolist()
@@ -121,17 +175,53 @@ def heatmap_3D():
     colmap.set_array(temperature)
 
     yg = ax.scatter(xs, ys, zs, c=colmap, marker='o')
+=======
+
+
+    xs = df["x"].tolist()
+    ys = df["y"].tolist()
+    zs = df["z"].tolist()
+    temperature= df["temperature"].tolist()
+
+
+    colors = cm.coolwarm((np.asarray(temperature)-min(temperature))/((max(temperature)-min(temperature))))
+    yg = ax.scatter(xs, ys, zs, c=colors, marker='o', alpha=0.05, s=2000)
+
+    colmap = cm.ScalarMappable(cmap=cm.coolwarm)
+    colmap.set_array(temperature)
+
+>>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
     cb = fig.colorbar(colmap)
 
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
 
-
+    ax.set_xlabel('X coordinates (cm)')
+    ax.set_ylabel('Y coordinates (cm)')
+    ax.set_zlabel('Z coordinates (cm)')
+    ax.set_title('3D corner view')
+    plt.savefig('./static/assets/img/3dHeatmap.png')
+    """
     plt.show()
+    bytes_image=io.BytesIO()
+    plt.savefig(bytes_image,format="png")
+    bytes_image.seek(0)
+    #plt.show()
+    return bytes_image
+    """
+
+
+def get_heatmap():
+    heatmap_3D(generatesPoints3D(300))
+    heatmap_2D(100000)
+
+
+
 
 if __name__=="__main__":
+<<<<<<< HEAD
     print("")
     df_heatmap=generatesPoints(1000)
     #print(df_heatmap.head(200))
     heatmap_3D()
+=======
+    get_heatmap()
+>>>>>>> e6899c8416ef9f52c8bdb596e861ee17c0fbaf7d
