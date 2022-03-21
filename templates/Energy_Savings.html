@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart</title>
+    <!-- <script src="echarts.js"></script> -->
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="column">
+            <h1>Chart</h1>
+        </div>
+
+        <div class="column">
+            <div class="chart" id="chart1"></div>
+            <div class="chart" id="chart2"></div>
+        </div>
+        <div class="column">
+            <div class="chart" id="chart3"> </div>
+            <div class="chart" id="chart4"></div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+  var myChart = echarts.init(document.getElementById('chart1'));
+  var option;
+
+  option = {
+    title: {
+      text: 'Monthly Power Usage'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['Power Using', 'Power Saving']
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name: 'Power Saving',
+        type: 'line',
+        stack: 'Total',
+        data: [1120, 1332, 1001, 1324, 909, 1230, 1210]
+      },
+      {
+        name: 'Power Using',
+        type: 'line',
+        stack: 'Total',
+        data: [5220, 7182, 5191, 6234, 8290, 7330, 6310]
+      }
+    ]
+  };
+  myChart.setOption(option);
+    </script>
+
+
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('chart2'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: 'Monthly Electricity bill savings'
+            },
+            tooltip: {},
+            legend: {
+                data: ['Euro']
+            },
+            xAxis: {
+                data: ['1', '2', '3', '4', '5', '6','7','8','9','10','11','12']
+            },
+            yAxis: {},
+            series: [{
+                name: 'Bills',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20,18,20,12,28,30,8]
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart3'));
+    var option;
+
+    option = {
+    title: {
+      text: 'Daily Power Usage'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['Power Using', 'Power Saving']
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name: 'Power Saving',
+        type: 'line',
+        stack: 'Total',
+        data: [120, 132, 101, 134, 90, 230, 210]
+      },
+      {
+        name: 'Power Using',
+        type: 'line',
+        stack: 'Total',
+        data: [220, 182, 191, 234, 290, 330, 310]
+      }
+    ]
+    };
+    myChart.setOption(option);
+    </script>
+    
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart4'));
+    var option;
+
+    option = {
+      title: {
+        text: 'Distribution of Electricity',
+        subtext: 'Fake Data'
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        }
+      },
+      toolbox: {
+        show: true,
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        // prettier-ignore
+        data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: '{value} W'
+        },
+        axisPointer: {
+          snap: true
+        }
+      },
+      visualMap: {
+        show: false,
+        dimension: 0,
+        pieces: [
+          {
+            lte: 6,
+            color: 'green'
+          },
+          {
+            gt: 6,
+            lte: 8,
+            color: 'red'
+          },
+          {
+            gt: 8,
+            lte: 14,
+            color: 'green'
+          },
+          {
+            gt: 14,
+            lte: 17,
+            color: 'red'
+          },
+          {
+            gt: 17,
+            color: 'green'
+          }
+        ]
+      },
+      series: [
+        {
+          name: 'Electricity',
+          type: 'line',
+          smooth: true,
+          // prettier-ignore
+          data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400],
+          markArea: {
+            itemStyle: {
+              color: 'rgba(255, 173, 177, 0.4)'
+            },
+            data: [
+              [
+                {
+                  name: 'Morning Peak',
+                  xAxis: '07:30'
+                },
+                {
+                  xAxis: '10:00'
+                }
+              ],
+              [
+                {
+                  name: 'Evening Peak',
+                  xAxis: '17:30'
+                },
+                {
+                  xAxis: '21:15'
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    };
+
+    myChart.setOption(option);
+</script>
+
+
+</body>
+
+</html>
