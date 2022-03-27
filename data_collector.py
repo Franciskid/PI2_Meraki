@@ -9,15 +9,21 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import pandas as pd
 import numpy as np
 import time
+import pytz
 
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from meteostat import Point as meteoPoint, Hourly
+from suntime import Sun, SunTimeException
 
 # Influx DB Connector
 retries = Retry(connect=10, read=5, redirect=10)
 influx_client = InfluxDBClient(url=influx_url, token=token, org=org, retries=retries)
 influx_db = influx_client.write_api(write_options=SYNCHRONOUS)
+
+
+#Sunset and sunrise
+sun = Sun(weather_location["lat"], weather_location["lon"])
 
 
 def find_network_sensors():
@@ -64,12 +70,17 @@ def get_latest_weather_reading():
     start = datetime.now() + timedelta(hours=-1)
     end = datetime.now()
 
+    #sunrise now
+    today_sr = sun.get_sunrise_time()
+    today_ss = sun.get_sunset_time()
+
     # Create Point for Courbevoie
     location = meteoPoint(weather_location["lat"], weather_location["lon"], weather_location["alt"])
 
     lastHour = Hourly(location, start, end)
     lastHour = lastHour.fetch().iloc[0]
-    lastHour.coco = float(0 if lastHour.name.hour < 8 or lastHour.name.hour > 20 or lastHour.coco >= 3 else 1)
+    lastHour.coco = float(0 if (lastHour.name.replace(tzinfo=pytz.timezone("Europe/Paris")) + timedelta(hours=-2)) < today_sr or (lastHour.name.replace(tzinfo=pytz.timezone("Europe/Paris")) + timedelta(hours=2)) > today_ss or lastHour.coco >= 3 else 1 if lastHour.coco <= 2 else 0)
+    
 
     return lastHour
 
@@ -117,6 +128,7 @@ def get_historical_weather_reading():
     # Get daily data for december till now
     data = Hourly(location, start, end)
     data = data.fetch()
+
     
     return data
 
@@ -133,11 +145,14 @@ def put_historical_data_into_influx_weather_temp_hum():
         data['time'] = data['time'].apply(str)
         data['time'] = pd.to_datetime(data['time'], format='%Y-%m-%d %H:%M:%S')
 
-        data.loc[data.time.dt.hour < 8, 'coco'] = 0
-        data.loc[data.time.dt.hour > 20, 'coco'] = 0
-        data.loc[data.coco >= 3, 'coco'] = 0
 
-        data.loc[(data.coco == 1) | (data.coco == 2), 'coco'] = 1
+        for index, row in data.iterrows():
+            #sunrise and sunset
+            sunrise = sun.get_local_sunrise_time(index)
+            sunset = sun.get_local_sunset_time(index)
+
+            row.coco = 0 if (row.time.replace(tzinfo=pytz.timezone("Europe/Paris")) + timedelta(hours=-2)) < sunrise or (row.time.replace(tzinfo=pytz.timezone("Europe/Paris")) + timedelta(hours=2)) > sunset or row.coco > 2 else 1 if row.coco <= 2 else 0
+            data.loc[index] = row
 
         points = [Point("Weather").
                   tag("location", "Pôle LdV").

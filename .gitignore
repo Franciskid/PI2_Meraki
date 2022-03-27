@@ -1,3 +1,5 @@
 .idea
 tester.py
 token_file.py
+.vercel
+vercel.json
