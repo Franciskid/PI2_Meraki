@@ -1,26 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Energy management{% endblock %}
+{% block title %}{{ content }}{% endblock %}
 
-{% block pageTitle %}Energy management{% endblock %}
+{% block pageTitle %}{{ content }}{% endblock %}
+
 
 {% block section1title %}<h2>Energy management</h2>{% endblock %}
-
 {% block section1content %}
-<div>
-    <img src="../static/assets/img/energy_savings/inside_outside_temp.png">
-    <img src="../static/assets/img/energy_savings/dif_inside_outside_temp.png">
-    <img src="../static/assets/img/energy_savings/estimated_consumption.png" >
-    <span>{{optimum_reduction}}</span>
-    <img src="../static/assets/img/energy_savings/estimated_energy_savings.png" >
-    <img src="../static/assets/img/energy_savings/estimated_money_savings.png" >
-    <span>{{weekly_energy_expenses}}</span>
 
+<div clas="container-fluid"  >
+    <div class="row" style="width:%100;height:%100">
+        <h3>Observations</h3>
+    </div>
+    <br>
+    <br>
+    <div class="row" style="width:%100;height:520px">
+        <div class="col-xl-6 col-md-4" style="width:%100;height:480px">
+            <img src="../static/assets/img/energy_savings/inside_outside_temp.png" width="640" height="480" frameborder="0" style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+        </div>
+        <div class="col-xl-6 col-md-4" style="width:%100;height:480px">
+            <img src="../static/assets/img/energy_savings/estimated_consumption.png" width="640" height="480" frameborder="0" style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+        </div>
+        <div class="row" style="width:%100;height:%100;">
+            <span style="padding:4rem 0rem 4rem 2rem; font-size:2rem;font-weight:bold">{{weekly_energy_expenses1}}<span style="color:red">{{weekly_energy_expenses2}}</span>{{weekly_energy_expenses3}}</span>
+        </div>
+    </div>
+    <br>
+    <hr>
+    <br>
+    <div class="row" style="width:%100;height:%100">
+        <h3>Recommendations</h3>
+    </div>
+    <br>
+    <br>
+    <div class="row" style="width:%100;height:520px;">
+             <div class="col-xl-6 col-md-4" style="width:%100;height:480px;">
+                 <img src="../static/assets/img/energy_savings/estimated_energy_savings.png" width="640" height="480" frameborder="0" style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+             </div>
+             <div class="col-xl-6 col-md-4" style="width:%100;height:480px;float:right;">
+                 <div style="display:block;margin-left:auto;margin-right:auto;height:480px;width:640px;">
+                     <div class="row" style="width:%60;height:100px;">
+                         <span style="margin:auto; font-size:2rem; font-weight:540;text-align:center;padding:1rem">Estimated money saved over a month by changing the temperature :</span>
+                     </div>
+                     <hr style="margin-left:1rem;margin-right:3rem;height:2px;border-width:0;color:gray;background-color:gray">
+                     <div class="row" style="width:%60;height:60%; margin:30px;">
+                         <span style="margin:auto; font-size:10rem; font-weight:bold; color:#00ff00">{{monthly_energy_saved}}</span>
+                     </div>
+                 </div>
+             </div>
+    </div>
+    <div class="row" style="width:%100;height:%100">
+        <span style="padding:4rem 0rem 0rem 2rem; font-size:2rem;font-weight:bold;">{{optimum_reduction1}}<span style="color:#2bd658">{{optimum_reduction2}}</span>.</span>
+    </div>
 
 </div>
 
-{% endblock %}
 
-{% block js %}
+
 
 {% endblock %}

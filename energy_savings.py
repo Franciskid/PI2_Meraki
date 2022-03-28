@@ -15,6 +15,7 @@ from data_collector import get_historical_weather_reading
 from meteostat import Point as meteoPoint, Hourly
 
 
+
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
@@ -137,7 +138,7 @@ def convert_energy_money_np(energy):
 days_to_plot=7
 optimum_temp=23
 inside_temp_by_days= get_average_temp_over_last_days(days_to_plot)[::-1]
-days = [str(datetime.datetime.now()-datetime.timedelta(days=i)).split(" ")[0] for i in range(days_to_plot)][::-1]
+days = [str(datetime.datetime.now()-datetime.timedelta(days=i)).split(" ")[0][5:] for i in range(days_to_plot)][::-1]
 outside_temp_by_days =get_outside_temp_over_last_days(days_to_plot)[::-1]
 consumption=consumption_computing(np.array(inside_temp_by_days),np.array(outside_temp_by_days))
 dif=np.array(inside_temp_by_days) -np.array(outside_temp_by_days)
@@ -196,7 +197,12 @@ def get_energy_infos():
     plot_energy_savings_by_temp()
     plot_money_saved_by_temp()
     optimum_reduction = compute_optimum_reduction()
-    return optimum_reduction, weekly_energy_expenses
+    monthly_energy_saved = np.round(np.mean(money_savings)*31,1)
+
+
+
+    return optimum_reduction, weekly_energy_expenses, monthly_energy_saved
+
 """
 if (__name__ == "__main__"):
     print("Obervations : ")
