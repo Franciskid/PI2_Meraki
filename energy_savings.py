@@ -195,7 +195,7 @@ def get_energy_infos():
     energy_consumption_by_days()
     weekly_energy_expenses = compute_energy_expenses_over_week()
     plot_energy_savings_by_temp()
-    plot_money_saved_by_temp()
+    #plot_money_saved_by_temp()
     optimum_reduction = compute_optimum_reduction()
     monthly_energy_saved = np.round(np.mean(money_savings)*31,1)
 

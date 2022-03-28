@@ -44,9 +44,12 @@ def index():
 
 @app.route('/heatmap', methods=['GET', 'POST'])
 def heatmap():
-    heatmap = get_heatmap()
+    t_min,t_max,gap = get_heatmap()
 
-    return render_template("heatmap.html")
+    return render_template("heatmap.html",
+                           t_min=t_min,
+                           t_max=t_max,
+                           gap=gap)
 
 @app.route('/energy_management', methods=["GET","POST"])
 def energy_management():

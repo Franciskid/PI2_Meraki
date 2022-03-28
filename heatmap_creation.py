@@ -174,6 +174,10 @@ def heatmap_3D(df):
 def get_heatmap():
     heatmap_3D(generatesPoints3D(300))
     heatmap_2D(100000)
+    t_min =around(df_sensors["temperature"].min(),1)
+    t_max=around(df_sensors["temperature"].max(),1)
+    gap =around(t_max-t_min,1)
+    return str(t_min)+"°C",str(t_max)+"°C",str(gap)+"°C"
 
 
 
