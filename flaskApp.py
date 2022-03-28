@@ -30,6 +30,7 @@ from data_collector import get_latest_sensor_reading
 from heatmap_creation import get_heatmap
 from energy_savings import get_energy_infos, optimum_temp
 
+
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 alertprofiles_to_snooze = []
@@ -148,11 +149,19 @@ def heatmap():
 
 @app.route('/energy_management', methods=["GET","POST"])
 def energy_management():
-    optimum_reduction, weekly_energy_expenses=get_energy_infos()
-    energy_expenses_sentence =str("We estimate in the last 7 days that you spent "+str(weekly_energy_expenses)+"€ for the temperature regulation in your room ")
-    optimum_reduction_sentence =str("The optimum temperature in an office is "+str(optimum_temp)+"°C so we advice you to change the temperature by "+str(optimum_reduction)+"°C")
-    return render_template("energy_management.html", weekly_energy_expenses=energy_expenses_sentence,
-                                                     optimum_reduction=optimum_reduction_sentence)
+    optimum_reduction, weekly_energy_expenses,monthly_energy_saved=get_energy_infos()
+    energy_expenses_sentence1 ="We estimate in the last 7 days that you spent "
+    energy_expenses_sentence2=str(weekly_energy_expenses)+"€"
+    energy_expenses_sentence3=" for the temperature regulation in your room."
+    optimum_reduction_sentence1 =str("The optimum temperature in an office is "+str(optimum_temp)+"°C so we advice you to change the temperature by ")
+    optimum_reduction_sentence2 =str(optimum_reduction)+"°C"
+
+    return render_template("energy_management.html", weekly_energy_expenses1=energy_expenses_sentence1,
+                                                     weekly_energy_expenses2=energy_expenses_sentence2,
+                                                     weekly_energy_expenses3=energy_expenses_sentence3,
+                                                     optimum_reduction1=optimum_reduction_sentence1,
+                                                     optimum_reduction2=optimum_reduction_sentence2,
+                                                     monthly_energy_saved=str(monthly_energy_saved)+"€")
 
 @app.route('/snooze_sensors', methods=['GET', 'POST'])
 def snooze_sensors():
