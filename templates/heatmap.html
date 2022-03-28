@@ -7,81 +7,92 @@
 {% block section1title %}<h2>Realtime Heat Maps of room L405 </h2>{% endblock %}
 
 {% block section1content %}
-<form method="POST" action="{{ url_for('heatmap') }}">
+<form method="POST" action="{{ url_for('heatmap') }}" style="width: 100%;">
+    <div style="display:flex;width: 100%;">
 
-    <div style="position: absolute;right: 100px;">
-        <span style="font-size: larger;font-weight: bold;">Date for heatmap :</span>
         <div>
-
-            <input type="datetime-local" name="time" value={{time_chose}} min="2022-01-01T00:00">
-            <button type="submit">REFRESH</button>
-        </div>
-    </div>
-    <div style="position: absolute;right: 100px; margin-top: 60px;">
-        <span style="font-size: larger;font-weight: bold;">Thresholds :</span>
-        <div>
-            <input type="checkbox" name="cb_automatic_threshold" id="cb_automatic_threshold" {% if automatic %} checked
-                {% endif %}>
-            <label>Automatic</label>
-        </div>
-        <div class="temp_threshold" style="margin-left: 10px;">
+            <span style="font-size: larger;font-weight: bold;">Date for heatmap :</span>
             <div>
-                <label>Max Temp (red)</label>
 
-                <input type="number" id="max_temp_threshold" name="max_temp_threshold" min="10" max="50"
-                    value="{{max_threshold}}" class="temp_threshold" disabled>
-            </div>
-            <div>
-                <label>Min Temp (blue)</label>
-
-                <input type="number" id="min_temp_threshold" name="min_temp_threshold" min="10" max="50"
-                    value="{{min_threshold}}" class="temp_threshold" disabled>
+                <input type="datetime-local" name="time" value={{time_chose}} min="2022-01-01T00:00">
             </div>
         </div>
+        <div style="margin-left: 30px;">
+            <span style="font-size: larger;font-weight: bold;">Thresholds :</span>
+            <div>
+                <input type="checkbox" name="cb_automatic_threshold" id="cb_automatic_threshold_id" {% if automatic == False %}
+                    checked {% endif %}>
+                <label>Manual</label>
+            </div>
+            <div class="temp_threshold" style="margin-left: 10px;">
+                <div>
+                    <label>Max Temp (red)</label>
+
+                    <input type="number" id="max_temp_threshold" name="max_temp_threshold" min="10" max="50"
+                        value="{{max_threshold}}" class="temp_threshold">
+                </div>
+                <div>
+                    <label>Min Temp (blue)</label>
+
+                    <input type="number" id="min_temp_threshold" name="min_temp_threshold" min="10" max="50"
+                        value="{{min_threshold}}" class="temp_threshold">
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" style="right: 100px; position: absolute;background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        cursor: pointer;
+        font-size: 16px;">REFRESH</button>
     </div>
 
 </form>
-<div>
-    <div clas="container-fluid">
-        <div class="row" style="width:%100;height:600px">
-            <div class="col-xl-6 col-md-4" style="width:%100;height:480px;">
-                <img src="../static/assets/img/3dHeatmap.png" width="800" height="600" frameborder="0"
-                    style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+<div clas="container-fluid">
+    <div class="row" style="width:%100;height:600px">
+        <div class="col-xl-6 col-md-4" style="width:%100;height:480px;">
+            <img src="../static/assets/img/3dHeatmap.png" width="800" height="600" frameborder="0"
+                style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+        </div>
+        <div class="col-xl-6 col-md-4" style="width:%100;height:480px;float:right;">
+            <img src="../static/assets/img/2dHeatmap.png" width="800" height="600" frameborder="0"
+                style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+        </div>
+    </div>
+
+
+    <div class="row" style="width:%100;height:200px">
+        <div style="padding:4rem 0rem 4rem 2rem; font-size:2rem;font-weight:bold">
+            <div class="row" style="height:50px">
+                <span style="display: inline;">Lowest temperature measured : <span
+                        style="color:blue">{{t_min}}</span></span>
             </div>
-            <div class="col-xl-6 col-md-4" style="width:%100;height:480px;float:right;">
-                <img src="../static/assets/img/2dHeatmap.png" width="800" height="600" frameborder="0"
-                    style="display:block;margin-left:auto;margin-right:auto;width:%100"></img>
+            <div class="row" style="height:50px">
+                <span style="display: inline;">Highest temperature measured : <span
+                        style="color:red">{{t_max}}</span></span>
+            </div>
+            <div class="row" style="height:50px">
+                <span style="display: inline;">Temperature gap : <span style="color:green">{{gap}}</span></span>
             </div>
         </div>
-
-
-        <div class="row" style="width:%100;height:200px">
-            <div style="padding:4rem 0rem 4rem 2rem; font-size:2rem;font-weight:bold">
-                <div class="row" style="height:50px">
-                    <span style="display: inline;">Lowest temperature measured : <span
-                            style="color:blue">{{t_min}}</span></span>
-                </div>
-                <div class="row" style="height:50px">
-                    <span style="display: inline;">Highest temperature measured : <span
-                            style="color:red">{{t_max}}</span></span>
-                </div>
-                <div class="row" style="height:50px">
-                    <span style="display: inline;">Temperature gap : <span style="color:green">{{gap}}</span></span>
-                </div>
-            </div>
-        </div>
+    </div>
+</div>
 
 
 
-        <script type="text/javascript">
-            $('.temp_threshold').attr('disabled', $('#cb_automatic_threshold').is(':checked'));
-            $('#cb_automatic_threshold').change(function () {
-                $('.temp_threshold').attr('disabled', $(this).is(':checked'));
-            });
-        </script>
+<script type="text/javascript">
+    $('.temp_threshold').attr('disabled', !$('#cb_automatic_threshold_id').is(':checked'));
+    $('#cb_automatic_threshold_id').change(function () {
+        $('.temp_threshold').attr('disabled', !$(this).is(':checked'));
+    });
+</script>
 
-        {% endblock %}
+{% endblock %}
 
-        {% block js %}
+{% block js %}
 
-        {% endblock %}
+{% endblock %}

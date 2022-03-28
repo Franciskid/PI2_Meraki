@@ -44,8 +44,7 @@ def index():
 
 @app.route('/heatmap', methods=['GET', 'POST'])
 def heatmap():
-    automatic_threshold = True if request.form.get("cb_automatic_threshold") else False
-    
+    automatic_threshold = False if request.form.get("cb_automatic_threshold") else True
     min_threshold = -1 if automatic_threshold else request.form.get("min_temp_threshold", type=int)
     max_threshold = -1 if automatic_threshold else request.form.get("max_temp_threshold", type=int)
     min_threshold, max_threshold = min(min_threshold, max_threshold), max(min_threshold, max_threshold)

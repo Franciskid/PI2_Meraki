@@ -154,8 +154,6 @@ def heatmap_3D(df):
 
 
 def get_heatmap(date = datetime.now(), threshold_min = -1, threshold_max = -1):
-    print("max :", threshold_max)
-    print("min :", threshold_min)
     global df_heatmap, df_sensors, min_x, min_y, min_z, max_x, max_y, max_z, min_threshold, max_threshold
     df_heatmap = pd.DataFrame()
     df_sensors=dataframe_creation()
