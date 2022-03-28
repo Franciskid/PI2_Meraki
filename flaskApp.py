@@ -41,105 +41,6 @@ def index():
     flash(alerts())
     return render_template("start_page.html")
 
-"""
-@app.route('/heatmap', methods=['GET', 'POST'])
-def heatmap():
-    global temp_values
-    global alert_profiles
-    global alert_profiles_overview
-    global sensor
-    global alertprofiles_to_snooze
-
-    sensor = request.args.get('sensor')
-    alert_profiles = []
-    alert_profiles_overview = []
-
-    tz_London = pytz.timezone('Europe/London')
-    timedelta_snooze = datetime.now(tz_London).strftime("%H:%M:%S")
-    timedelta_snooze_compare = datetime.strptime(timedelta_snooze, "%H:%M:%S")
-    for ap_to_snooze_delete in alertprofiles_to_snooze:
-        ap_to_snooze_delete_time = datetime.strptime(ap_to_snooze_delete['snooze_until'], "%H:%M:%S")
-        if timedelta_snooze_compare > ap_to_snooze_delete_time:
-            alertprofiles_to_snooze.remove(ap_to_snooze_delete)
-
-    if sensor == None:
-        #no need to look for sensors, just calling 'latestBySensor' will retreive all the sensors data in the network
-        logic = 0
-        url = 'https://api.meraki.com/api/v0/networks/' + network_id + '/sensors/stats/latestBySensor?metric=temperature'
-        headers = {
-            'X-Cisco-Meraki-API-Key': meraki_api_key,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-
-        temp_values = {jmespath.search(f"sensor_mapping[?(@.serial=='{x['serial']}')].name", sensor_mapping): f"{str(round(float(x['value']), 2))}°C" for x in requests.get(url, headers=headers).json()}
-
-        url = 'https://api.meraki.com/api/v1/networks/' + network_id + '/sensors/alerts/profiles'
-
-        get_alert_profiles = requests.get(url, headers=headers, verify=False)
-
-        for profile in get_alert_profiles.json():
-            profile_sensor_mapping = []
-            for sens in sensor_mapping:
-                if sens['serial'] in profile['serials']:
-                    profile_sensor_mapping.append(sens['name'])
-            dict = {
-                'name': profile['name'],
-                'type': profile['conditions'][0]['type'],
-                'activated': profile_sensor_mapping,
-                'id': profile['id'],
-                'applied_sensors': profile['serials']
-            }
-            alert_profiles_overview.append(dict)
-
-    elif sensor != None:
-        url = 'https://api.meraki.com/api/v1/networks/' + network_id + '/sensors/alerts/profiles'
-        headers = {
-            'X-Cisco-Meraki-API-Key': meraki_api_key,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-        get_alert_profiles = requests.get(url, headers=headers, verify=False)
-
-        if sensor == 'all':
-            logic = 0
-            for profile in get_alert_profiles.json():
-                profile_sensor_mapping = []
-                for sens in sensor_mapping:
-                    if sens['serial'] in profile['serials']:
-                        profile_sensor_mapping.append(sens['name'])
-                dict = {
-                    'name': profile['name'],
-                    'type': profile['conditions'][0]['type'],
-                    'activated': profile_sensor_mapping,
-                    'id': profile['id'],
-                    'applied_sensors': profile['serials']
-                }
-                alert_profiles_overview.append(dict)
-        else:
-            logic = 1
-            for sen in sensor_mapping:
-                if sen['name'] == str(sensor):
-                    serial = sen['serial']
-
-            for profile in get_alert_profiles.json():
-                if serial in profile['serials']:
-                    activated = 'yes'
-                else:
-                    activated = 'no'
-                dict = {
-                    'name': profile['name'],
-                    'type': profile['conditions'][0]['type'],
-                    'activated': activated,
-                    'id': profile['id'],
-                    'applied_sensors': profile['serials']
-                }
-                alert_profiles.append(dict)
-
-    return render_template("dc_heatmap.html", temp_values=temp_values, logic=logic, alert_profiles=alert_profiles,
-                           alert_profiles_overview=alert_profiles_overview, sensor=sensor, ASHRAE_low=ASHRAE_low,
-                           ASHRAE_high=ASHRAE_high, alertprofiles_to_snooze=alertprofiles_to_snooze)
-"""
 
 @app.route('/heatmap', methods=['GET', 'POST'])
 def heatmap():
@@ -583,10 +484,26 @@ def add_alertprofile():
     return redirect(url_for('.heatmap', sensor=sensor_name))
 
 
+
 @app.route('/grafana_chart', methods=['GET', 'POST'])
 def grafana_chart():
+    time_picker = ["Last 30 minutes", "Last hour", "Last 24 hours", "Last 2 days", "Last 7 days", "Last 30 days", "Last 90 days"]
+    time_picker_tohours = {"Last 30 minutes" : 0.5,"Last hour": 1, "Last 24 hours":24, "Last 2 days":48, "Last 7 days":168, "Last 30 days": 720, "Last 90 days": 2160}
     content = 'Grafana Chart'
-    return render_template("grafana_import.html", content=content)
+    default_selected = time_picker[4]
+
+    if request.method == 'GET':
+        end_tick = ticks(datetime.now())
+        start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[default_selected]))
+        return render_template("grafana_import.html", content=content, times = time_picker, default_select=default_selected, start_tick = start_tick, end_tick = end_tick)
+    else:
+        selected = request.form.get('times', '')
+        end_tick = ticks(datetime.now())
+        start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[selected]))
+        return render_template("grafana_import.html", content=content, times = time_picker, default_select=selected, start_tick = start_tick, end_tick = end_tick)
+
+def ticks(dt):
+    return time.mktime(dt.timetuple()) * 1000
 
 @app.route('/', methods=['GET', 'POST'])
 def alert():
