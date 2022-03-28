@@ -44,9 +44,18 @@ def index():
 
 @app.route('/heatmap', methods=['GET', 'POST'])
 def heatmap():
-    heatmap = get_heatmap()
+    automatic_threshold = True if request.form.get("cb_automatic_threshold") else False
+    
+    min_threshold = -1 if automatic_threshold else request.form.get("min_temp_threshold", type=int)
+    max_threshold = -1 if automatic_threshold else request.form.get("max_temp_threshold", type=int)
+    min_threshold, max_threshold = min(min_threshold, max_threshold), max(min_threshold, max_threshold)
 
-    return render_template("heatmap.html")
+    date = datetime.now() if request.method == "GET" else datetime.strptime(request.form.get('time', ''), "%Y-%m-%dT%H:%M")
+
+    get_heatmap(date, min_threshold, max_threshold)
+
+    return render_template("heatmap.html", time_chose=date.strftime("%Y-%m-%dT%H:%M"), automatic=automatic_threshold, min_threshold=min_threshold, max_threshold = max_threshold)
+
 
 @app.route('/energy_management', methods=["GET","POST"])
 def energy_management():
@@ -62,7 +71,8 @@ def energy_management():
                                                      weekly_energy_expenses3=energy_expenses_sentence3,
                                                      optimum_reduction1=optimum_reduction_sentence1,
                                                      optimum_reduction2=optimum_reduction_sentence2,
-                                                     monthly_energy_saved=str(monthly_energy_saved)+"€")
+                                                     monthly_energy_saved=str(monthly_energy_saved)+"€",
+                                                     content = "Energy Management")
 
 @app.route('/snooze_sensors', methods=['GET', 'POST'])
 def snooze_sensors():

@@ -42,10 +42,10 @@ def format_date(td):
 
 
 def get_latest_reading(date, metric):
-    stop = datetime.today() - date
-    start = (datetime.today() + timedelta(hours=24)) - date
+    stop = datetime.now() - date
+    start = (datetime.now() + timedelta(hours=24)) - date
     tables = query_api.query(f'from(bucket:"{bucket}")'
-                             f' |> range(start: -{format_date(start)}, stop:{format_date(stop)})'
+                             f' |> range(start: -{format_date(start)}, stop:-{format_date(stop)})'
                              f' |> filter(fn: (r) => r["_field"] == "{metric}")'
                              f' |> filter(fn: (r) => r["location"] == "L404")'
                              f' |> yield(name: "last")')
@@ -60,4 +60,4 @@ def get_latest_reading(date, metric):
 
 
 if (__name__ == "__main__"):
-    print(get_average_temp(datetime.today() + timedelta(hours=-10)))
+    print(get_average_temp(datetime.now() - timedelta(hours=452)))
