@@ -478,20 +478,19 @@ def add_alertprofile():
 
 @app.route('/grafana_chart', methods=['GET', 'POST'])
 def grafana_chart():
-    time_picker = ["Last 30 minutes", "Last hour", "Last 24 hours", "Last 2 days", "Last 7 days", "Last 30 days", "Last 90 days"]
-    time_picker_tohours = {"Last 30 minutes" : 0.5,"Last hour": 1, "Last 24 hours":24, "Last 2 days":48, "Last 7 days":168, "Last 30 days": 720, "Last 90 days": 2160}
+    time_picker_tohours = {"Last hour" : 1,"Last 4 hours": 4, "Last 24 hours":24, "Last 2 days":48, "Last 7 days":168, "Last 30 days": 720, "Last 90 days": 2160}
     content = 'Grafana Chart'
-    default_selected = time_picker[4]
+    default_selected = "Last 7 days"
 
     if request.method == 'GET':
         end_tick = ticks(datetime.now())
         start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[default_selected]))
-        return render_template("grafana_import.html", content=content, times = time_picker, default_select=default_selected, start_tick = start_tick, end_tick = end_tick)
+        return render_template("grafana_import.html", content=content, times = [*time_picker_tohours], default_select=default_selected, start_tick = start_tick, end_tick = end_tick)
     else:
         selected = request.form.get('times', '')
         end_tick = ticks(datetime.now())
         start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[selected]))
-        return render_template("grafana_import.html", content=content, times = time_picker, default_select=selected, start_tick = start_tick, end_tick = end_tick)
+        return render_template("grafana_import.html", content=content, times = [*time_picker_tohours], default_select=selected, start_tick = start_tick, end_tick = end_tick)
 
 def ticks(dt):
     return time.mktime(dt.timetuple()) * 1000
