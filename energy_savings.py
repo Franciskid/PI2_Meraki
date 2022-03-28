@@ -13,7 +13,7 @@ from PIL import Image
 from data_collector import get_historical_weather_reading
 
 from meteostat import Point as meteoPoint, Hourly
-
+from scipy.interpolate import make_interp_spline
 
 
 client = InfluxDBClient(url=influx_url, token=token, org=org)
@@ -67,7 +67,6 @@ def get_outside_temp_over_last_days(ndays):
 
 
 
-
 def inside_outside_temp_evolution_plot():
     fig,ax=plt.subplots()
     ax.plot(days, inside_temp_by_days, color='red', marker='o')
@@ -79,6 +78,8 @@ def inside_outside_temp_evolution_plot():
     ax.legend(["Inside temp","Outside temp"])
     ax.grid(True)
     plt.savefig('./static/assets/img/energy_savings/inside_outside_temp.png')
+
+
 
 
 
@@ -138,6 +139,7 @@ def convert_energy_money_np(energy):
 days_to_plot=7
 optimum_temp=23
 inside_temp_by_days= get_average_temp_over_last_days(days_to_plot)[::-1]
+
 days = [str(datetime.datetime.now()-datetime.timedelta(days=i)).split(" ")[0][5:] for i in range(days_to_plot)][::-1]
 outside_temp_by_days =get_outside_temp_over_last_days(days_to_plot)[::-1]
 consumption=consumption_computing(np.array(inside_temp_by_days),np.array(outside_temp_by_days))
@@ -164,6 +166,15 @@ money_savings=convert_energy_money_np(np.array(energy_savings))
 
 def compute_optimum_reduction():
     return round(temp_inside_average -optimum_temp,1)
+
+def compute_monthly_money_savings(reduction):
+    new_temp = np.array(inside_temp_by_days)-reduction
+    new_consumption_average=np.mean(consumption_computing(new_temp,np.array(outside_temp_by_days)))
+    avg_savings=consumption_average-new_consumption_average
+    return round(convert_energy_money(avg_savings)*31,1)
+
+
+    return convert_energy_money_np()
 
 def plot_energy_savings_by_temp():
     fig,ax=plt.subplots()
@@ -197,7 +208,7 @@ def get_energy_infos():
     plot_energy_savings_by_temp()
     #plot_money_saved_by_temp()
     optimum_reduction = compute_optimum_reduction()
-    monthly_energy_saved = np.round(np.mean(money_savings)*31,1)
+    monthly_energy_saved = compute_monthly_money_savings(optimum_reduction)
 
 
 
