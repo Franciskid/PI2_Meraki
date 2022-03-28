@@ -52,9 +52,12 @@ def heatmap():
 
     date = datetime.now() if request.method == "GET" else datetime.strptime(request.form.get('time', ''), "%Y-%m-%dT%H:%M")
 
-    get_heatmap(date, min_threshold, max_threshold)
+    t_min,t_max,gap = get_heatmap(date, min_threshold, max_threshold)
 
-    return render_template("heatmap.html", time_chose=date.strftime("%Y-%m-%dT%H:%M"), automatic=automatic_threshold, min_threshold=min_threshold, max_threshold = max_threshold)
+    return render_template("heatmap.html", time_chose=date.strftime("%Y-%m-%dT%H:%M"), automatic=automatic_threshold, min_threshold=min_threshold, max_threshold = max_threshold,
+                           t_min=t_min,
+                           t_max=t_max,
+                           gap=gap)
 
 
 @app.route('/energy_management', methods=["GET","POST"])
