@@ -8,10 +8,9 @@
 
 {% block section1content %}
 
-<form method="POST" style="position: absolute;right: 100px;">
+<form method="POST" action="{{ url_for('grafana_chart') }}" style="position: absolute;right: 100px;">
 
-    <select method="POST" action="{{ url_for('grafana_chart') }}"  name="times"
-        required>
+    <select name="times" required>
         {% for time in times %}
         <option value="{{time}}" name="{{time}}" {% if time==default_select %} selected {% endif %}>{{time}}</option>"
         {% endfor %}
