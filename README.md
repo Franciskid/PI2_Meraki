@@ -99,9 +99,7 @@ pip install -m requirements.txt
 # Screenshots
 
 ![index](https://user-images.githubusercontent.com/74976008/160583940-10652f32-28ec-4314-b77e-93f64f74eff2.png)
-![heatmap](https://user-images.githubusercontent.com/74976008/160584043-c42600bd-8ced-4331-9ed3-ea38b3a4bad0.png)
-![grafana](https://user-images.githubusercontent.com/74976008/160583996-7e68237e-bc24-4d96-8b07-36ff1738e56e.png)
+![heatmap](https://user-images.githubusercontent.com/74976008/160633439-3a2c2b0d-95d8-41c9-a801-7aa5170389e6.png)
+![grafana](https://user-images.githubusercontent.com/74976008/160633460-d8b27181-0103-4224-b231-6cdfb71b65af.png)
 ![energy](https://user-images.githubusercontent.com/74976008/160584066-0a37dca9-efbc-44dd-89ce-4d9291c9500a.png)
-
-
 
