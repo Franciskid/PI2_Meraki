@@ -98,7 +98,6 @@ pip install -m requirements.txt
 ```
 # Screenshots
 
-All your files and folders are presented as a tree in the file explorer. You can switch from one to another by clicking a file in the tree.
 ![index](https://user-images.githubusercontent.com/74976008/160583940-10652f32-28ec-4314-b77e-93f64f74eff2.png)
 ![heatmap](https://user-images.githubusercontent.com/74976008/160584043-c42600bd-8ced-4331-9ed3-ea38b3a4bad0.png)
 ![grafana](https://user-images.githubusercontent.com/74976008/160583996-7e68237e-bc24-4d96-8b07-36ff1738e56e.png)
