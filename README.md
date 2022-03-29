@@ -1,5 +1,6 @@
 # PI² Project! 
-![N|Solid](https://www.esilv.fr/ecole-ingenieur/logos/logo_esilv_png_couleur.png =100x100 ) ![N|Solid](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Meraki_Logo_2016.svg/800px-Meraki_Logo_2016.svg.png =x100 ) 
+<img src="https://www.esilv.fr/ecole-ingenieur/logos/logo_esilv_png_couleur.png" width="100"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Meraki_Logo_2016.svg/800px-Meraki_Logo_2016.svg.png" height="100">
+
 Our project's goal, made in collaboration with Cisco Meraki, is to reduce the **carbon footprint** and **energy consumption** in **datacenters** and **offices** by processing data from Meraki sensors.
 
 Original code from [github:gve_devnet_meraki_mt_dashboard](https://github.com/gve-sw/gve_devnet_meraki_mt_dashboard), modified for our project's needs
@@ -102,9 +103,6 @@ All your files and folders are presented as a tree in the file explorer. You can
 ![heatmap](https://user-images.githubusercontent.com/74976008/160584043-c42600bd-8ced-4331-9ed3-ea38b3a4bad0.png)
 ![grafana](https://user-images.githubusercontent.com/74976008/160583996-7e68237e-bc24-4d96-8b07-36ff1738e56e.png)
 ![energy](https://user-images.githubusercontent.com/74976008/160584066-0a37dca9-efbc-44dd-89ce-4d9291c9500a.png)
-
-
-
 
 
 
