@@ -5,7 +5,7 @@ from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url
 
 from datetime import datetime, timedelta
-from average_temp import get_average_temp, get_latest_reading
+from average_temp import get_average_temp, get_date_reading
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -33,7 +33,7 @@ def dataframe_creation():
 #Put temperature of the sensors in the df
 def AssignTemperature(date):
     average_temp = get_average_temp(date)
-    temp = get_latest_reading(date, "temperature")
+    temp = get_date_reading(date, "temperature")
 
     for i in range(len(df_sensors)):
         if str(i+1) in temp :

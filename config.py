@@ -18,6 +18,7 @@ temperature_sensors = ["Q3CA-W7P5-GLWJ", "Q3CA-SPYL-SC5M", "Q3CA-T9FH-7ZF5",
 
 door_sensors = ["Q3CC-CHNP-XUTA", "Q3CC-7QPS-TABH"]
 
+
 # ================================= #
 #          INFLUX DB                #
 # ================================= #
@@ -27,12 +28,6 @@ bucket = "merakiBucket"
 token = influx_token
 influx_url = "http://localhost:8086"
 
-# ================================= #
-#      ASHRAE SETTINGS              #
-# ================================= #
-
-ASHRAE_low = 15
-ASHRAE_high = 27
 
 # ================================= #
 #         Weather Point             #
@@ -40,6 +35,7 @@ ASHRAE_high = 27
 
 # Weather location from Courbevoie => closest weather metrics are taken from Paris
 weather_location = {"lat": 48.896640253127785, "lon": 2.23684585029297, "alt": 50}
+
 
 # ================================= #
 #       SENSOR MAPPINGS             #

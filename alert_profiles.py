@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, date
-from average_temp import get_average_temp, get_average_hum, get_latest_reading
+from average_temp import get_average_temp, get_average_hum, get_date_reading
 
 def alerts():
     now = datetime.today() + timedelta(hours=-10)
-    all_temp = get_latest_reading(now, 'temperature')
+    all_temp = get_date_reading(now, 'temperature')
     avg_temp = get_average_temp(now)
     avg_humidity = get_average_hum(now)
 

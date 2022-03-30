@@ -65,7 +65,7 @@ def energy_management():
     energy_expenses_sentence1 ="We estimate in the last 7 days that you spent "
     energy_expenses_sentence2=str(weekly_energy_expenses)+"€"
     energy_expenses_sentence3=" for the temperature regulation in your room."
-    optimum_reduction_sentence1 =str("The optimum temperature in an office is "+str(optimum_temp)+"°C so we advice you to change the temperature by ")
+    optimum_reduction_sentence1 =str("The optimum temperature in an office is "+str(optimum_temp)+"°C so we advise you to change the temperature by ")
     optimum_reduction_sentence2 =str(optimum_reduction)+"°C"
 
     return render_template("energy_management.html", weekly_energy_expenses1=energy_expenses_sentence1,
