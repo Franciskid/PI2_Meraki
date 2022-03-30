@@ -61,10 +61,12 @@ def get_range_mean_reading(date_beg, date_end = datetime.now(), metric = "temper
     for table in tables:
         for record in table.records:
             if (record.get_measurement() not in values):
-                values[record.get_measurement()] = record.get_value()
+                val = record.get_value()
+                values[record.get_measurement()] = val if type(val) is float else 0
                 amount_of_measurements[record.get_measurement()] = 1
             else:
-                values[record.get_measurement()] += record.get_value()
+                val = record.get_value()
+                values[record.get_measurement()] += val if type(val) is float else 0
                 amount_of_measurements[record.get_measurement()] += 1
 
     values_mean = {k: v / amount_of_measurements[k] for k, v in values.items()}
@@ -87,4 +89,4 @@ def get_average_from_data(values):
 
 if (__name__ == "__main__"):
     #print(get_average_temp(datetime.now() - timedelta(hours=452)))
-    print(get_range_mean_reading(datetime.now() - timedelta(days=2), datetime.now() - timedelta(days=1), "temperature"))
+    print(get_range_mean_reading(datetime.now() - timedelta(days=1), datetime.now() - timedelta(days=0), "temperature"))

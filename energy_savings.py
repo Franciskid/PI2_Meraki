@@ -4,16 +4,13 @@ from config import sensor_mapping
 from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url, weather_location
 
-import datetime
-from average_temp import get_average_temp, format_date
+from average_temp import get_average_temp, format_date, get_range_mean_reading
 from pylab import *
+from datetime import timedelta, datetime
 import matplotlib.pyplot as plt
-from PIL import Image
 
 from data_collector import get_historical_weather_reading
 
-from meteostat import Point as meteoPoint, Hourly
-from scipy.interpolate import make_interp_spline
 
 
 client = InfluxDBClient(url=influx_url, token=token, org=org)
@@ -24,30 +21,7 @@ query_api = client.query_api()
 def get_average_temp_over_last_days(n_days):
     temp_by_day=[]
     for i in range(n_days):
-        start="-"+str(i+1)+"d0h0m0s"
-        stop="-"+str(i)+"d0h0m0s"
-
-        tables = query_api.query(f'from(bucket:"{bucket}")'
-                                 f' |> range(start: {start},'
-                                 f' stop:{stop})'
-                                 f' |> filter(fn: (r) => r["_field"] == "temperature")'
-                                 f' |> filter(fn: (r) => r["location"] == "L404")'
-                                 f' |> yield(name: "mean")')
-
-        values = {}
-        for table in tables:
-            for record in table.records:
-                if (record.get_measurement() not in values):
-                    values[record.get_measurement()] = record.get_value()
-
-        data = list(values.values())
-        mean = np.mean(data, axis=0)
-        sd = np.std(data, axis=0)
-        minTemp = mean - 0.5 * sd
-        maxTemp = mean + 0.5 * sd
-        final_data = [x for x in data if ((x > minTemp) & (x < maxTemp))]
-        final_mean = np.mean(final_data)
-        temp_by_day.append(final_mean)
+        temp_by_day.append(get_range_mean_reading(datetime.now() - timedelta(days= i + 1), datetime.now() - timedelta(days=i), "temperature"))
 
     return temp_by_day
 
@@ -56,7 +30,7 @@ def get_outside_temp_over_last_days(ndays):
     temp_by_day =[]
     data=get_historical_weather_reading().reset_index(level=0)
     for i in range(ndays):
-        date=str(datetime.datetime.now()-datetime.timedelta(days=i)).split(" ")[0]
+        date=str(datetime.now()-timedelta(days=i)).split(" ")[0]
         temp_of_day_i=[]
         for j in range(len(data)):
             if str(data.iloc[j,0]).split(" ")[0]==date:
@@ -140,7 +114,7 @@ days_to_plot=7
 optimum_temp=23
 inside_temp_by_days= get_average_temp_over_last_days(days_to_plot)[::-1]
 
-days = [str(datetime.datetime.now()-datetime.timedelta(days=i)).split(" ")[0][5:] for i in range(days_to_plot)][::-1]
+days = [str(datetime.now()-timedelta(days=i)).split(" ")[0][5:] for i in range(days_to_plot)][::-1]
 outside_temp_by_days =get_outside_temp_over_last_days(days_to_plot)[::-1]
 consumption=consumption_computing(np.array(inside_temp_by_days),np.array(outside_temp_by_days))
 dif=np.array(inside_temp_by_days) -np.array(outside_temp_by_days)
