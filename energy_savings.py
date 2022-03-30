@@ -5,7 +5,7 @@ from influxdb_client import InfluxDBClient
 from config import org, token, bucket, influx_url, weather_location
 
 import datetime
-from average_temp import get_average_temp, format_date
+from average_temp import get_range_mean_reading, format_date
 from pylab import *
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -24,30 +24,11 @@ query_api = client.query_api()
 def get_average_temp_over_last_days(n_days):
     temp_by_day=[]
     for i in range(n_days):
-        start="-"+str(i+1)+"d0h0m0s"
-        stop="-"+str(i)+"d0h0m0s"
+        start="-"+str(i+1)+"d1h0m0s"
+        stop="-"+str(i)+"d1h0m0s"
 
-        tables = query_api.query(f'from(bucket:"{bucket}")'
-                                 f' |> range(start: {start},'
-                                 f' stop:{stop})'
-                                 f' |> filter(fn: (r) => r["_field"] == "temperature")'
-                                 f' |> filter(fn: (r) => r["location"] == "L404")'
-                                 f' |> yield(name: "mean")')
 
-        values = {}
-        for table in tables:
-            for record in table.records:
-                if (record.get_measurement() not in values):
-                    values[record.get_measurement()] = record.get_value()
-
-        data = list(values.values())
-        mean = np.mean(data, axis=0)
-        sd = np.std(data, axis=0)
-        minTemp = mean - 0.5 * sd
-        maxTemp = mean + 0.5 * sd
-        final_data = [x for x in data if ((x > minTemp) & (x < maxTemp))]
-        final_mean = np.mean(final_data)
-        temp_by_day.append(final_mean)
+        temp_by_day.append(get_range_mean_reading(start,stop))
 
     return temp_by_day
 
@@ -216,6 +197,7 @@ def get_energy_infos():
 
 """
 if (__name__ == "__main__"):
+    print("inside_temp_by_days : ",inside_temp_by_days)
     print("Obervations : ")
     dif_inside_outside_temp()
     inside_outside_temp_evolution_plot()

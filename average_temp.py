@@ -45,12 +45,11 @@ def get_date_reading(date, metric):
             values[record.get_measurement()] = record.get_value()
 
     return values
-    
-def get_range_mean_reading(date_beg, date_end = datetime.now(), metric = "temperature"):
-    stop = datetime.now() - date_end
-    start = datetime.now() - date_beg
+
+def get_range_mean_reading(start, stop, metric = "temperature"):
+
     tables = query_api.query(f'from(bucket:"{bucket}")'
-                             f' |> range(start: -{format_date(start)}, stop:-{format_date(stop)})'
+                             f' |> range(start: {start}, stop:{stop})'
                              f' |> filter(fn: (r) => r["_field"] == "{metric}")'
                              f' |> filter(fn: (r) => r["location"] == "L404")'
                              f' |> aggregateWindow(every:1h, fn:mean, createEmpty: true)'
@@ -58,14 +57,18 @@ def get_range_mean_reading(date_beg, date_end = datetime.now(), metric = "temper
 
     values = {}
     amount_of_measurements = {}
+
     for table in tables:
         for record in table.records:
-            if (record.get_measurement() not in values):
-                values[record.get_measurement()] = record.get_value()
-                amount_of_measurements[record.get_measurement()] = 1
-            else:
-                values[record.get_measurement()] += record.get_value()
-                amount_of_measurements[record.get_measurement()] += 1
+
+            if record.get_value()!=None :
+                if (record.get_measurement() not in values):
+                    values[record.get_measurement()] = record.get_value()
+                    amount_of_measurements[record.get_measurement()] = 1
+
+                else:
+                    values[record.get_measurement()] += record.get_value()
+                    amount_of_measurements[record.get_measurement()] += 1
 
     values_mean = {k: v / amount_of_measurements[k] for k, v in values.items()}
 
