@@ -32,7 +32,6 @@ from energy_savings import get_energy_infos, optimum_temp
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-alertprofiles_to_snooze = []
 
 
 @app.route('/', methods=['GET'])
@@ -58,7 +57,7 @@ def heatmap():
                            gap=gap)
 
 
-@app.route('/energy_management', methods=["GET","POST"])
+@app.route('/energy_management', methods=["GET"])
 def energy_management():
     optimum_reduction, weekly_energy_expenses,monthly_energy_saved=get_energy_infos()
     energy_expenses_sentence1 ="We estimate in the last 7 days that you spent "
@@ -80,20 +79,17 @@ def energy_management():
 def grafana_chart():
     time_picker_tohours = {"Last hour" : 1,"Last 4 hours": 4, "Last 24 hours":24, "Last 2 days":48, "Last 7 days":168, "Last 30 days": 720, "Last 90 days": 2160}
     content = 'Grafana Chart'
-    default_selected = "Last 7 days"
+    selected = "Last 7 days" if request.method == 'GET' else request.form.get('times', '')
 
-    if request.method == 'GET':
-        end_tick = ticks(datetime.now())
-        start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[default_selected]))
-        return render_template("grafana_import.html", content=content, times = [*time_picker_tohours], default_select=default_selected, start_tick = start_tick, end_tick = end_tick)
-    else:
-        selected = request.form.get('times', '')
-        end_tick = ticks(datetime.now())
-        start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[selected]))
-        return render_template("grafana_import.html", content=content, times = [*time_picker_tohours], default_select=selected, start_tick = start_tick, end_tick = end_tick)
+    end_tick = ticks(datetime.now())
+    start_tick = ticks(datetime.now() + timedelta(hours=-time_picker_tohours[selected]))
+    return render_template("grafana_import.html", content=content, times = [*time_picker_tohours], default_select=selected, start_tick = start_tick, end_tick = end_tick)
+
 
 def ticks(dt):
     return time.mktime(dt.timetuple()) * 1000
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def alert():

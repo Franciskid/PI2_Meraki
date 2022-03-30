@@ -16,12 +16,19 @@ from data_collector import get_historical_weather_reading
 client = InfluxDBClient(url=influx_url, token=token, org=org)
 query_api = client.query_api()
 
+
+days_to_plot=7
+optimum_temp=22
+
+
 #Observations
 #Plot of the evolution of the inside average temperature during a week
 def get_average_temp_over_last_days(n_days):
     temp_by_day=[]
+    dates = [datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days = i) for i in range(n_days + 1)]
+
     for i in range(n_days):
-        temp_by_day.append(get_range_mean_reading(datetime.now() - timedelta(days= i + 1), datetime.now() - timedelta(days=i), "temperature"))
+        temp_by_day.append(get_range_mean_reading(dates[i + 1], dates[i], "temperature"))
 
     return temp_by_day
 
@@ -43,14 +50,30 @@ def get_outside_temp_over_last_days(ndays):
 
 def inside_outside_temp_evolution_plot():
     fig,ax=plt.subplots()
+
+    good_temps = [optimum_temp for i in range(len(days))]
+
     ax.plot(days, inside_temp_by_days, color='red', marker='o')
+    ax.plot(days, good_temps, color='green', marker='.')
     ax.plot(days, outside_temp_by_days, color='blue', marker='o')
     ax.set_title('Average inside and outside temperature', fontsize=14)
     ax.set_xlabel('Date', fontsize=14)
+
+    plt.fill_between(days, good_temps, outside_temp_by_days, color="blue", alpha=0.2)
+    plt.fill_between(days, inside_temp_by_days, good_temps, color="red", alpha=0.2)
+
+    ymin = (min(outside_temp_by_days) if min(outside_temp_by_days) < min(inside_temp_by_days) else min(inside_temp_by_days)) - 5
+    ymax = (max(outside_temp_by_days) if max(outside_temp_by_days) > max(inside_temp_by_days) else max(inside_temp_by_days)) + 5
+    for i in range(len(days)):
+        plt.text(days[i], ymin + 1, f'{abs(inside_temp_by_days[i]-outside_temp_by_days[i]):.1f}°C', size=12)
+
+    plt.ylim([ymin,ymax])
+
     ax.set_xticks(days,rotation=25)
     ax.set_ylabel('Temperature in degrees Celsius', fontsize=14)
-    ax.legend(["Inside temp","Outside temp"])
+    ax.legend(["Inside temp","Perfect temperature to work", "Outside temp"])
     ax.grid(True)
+
     plt.savefig('./static/assets/img/energy_savings/inside_outside_temp.png')
 
 
@@ -110,8 +133,6 @@ def convert_energy_money_np(energy):
 
 
 
-days_to_plot=7
-optimum_temp=23
 inside_temp_by_days= get_average_temp_over_last_days(days_to_plot)[::-1]
 
 days = [str(datetime.now()-timedelta(days=i)).split(" ")[0][5:] for i in range(days_to_plot)][::-1]
@@ -121,10 +142,9 @@ dif=np.array(inside_temp_by_days) -np.array(outside_temp_by_days)
 temp_inside_average=np.average(inside_temp_by_days)
 temp_outside_average =np.average(outside_temp_by_days)
 consumption_average=np.average(consumption)
-#Recommendations :
-def compute_dif_temp(temp):
 
-    return temp_average-temp
+
+#Recommendations :
 
 def compute_energy_savings(temp,outside ):
     energy = consumption_computing(temp, outside)
