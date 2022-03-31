@@ -44,6 +44,10 @@ Original code from [github:gve_devnet_meraki_mt_dashboard](https://github.com/gv
 		     }
          } # copy this dictionary for as many sensors there are
      ]
+     
+     # Location of the sensors, for the weather
+     weather_location = {"lat": 0, "lon": 0, "alt": 0}
+
     
     
     ```
